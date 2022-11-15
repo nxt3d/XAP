@@ -1,4 +1,4 @@
-// SPDX-License-Identifier:
+//SPDX-License-Identifier: none
 
 pragma solidity ^0.8.17;
 
@@ -36,7 +36,7 @@ contract XAPRegistry is IXAPRegistry, Controllable {
         records[name].owner = _address;
 
     }
-    
+
     function register(bytes10 name, uint chainId, address _address) external onlyNameOwner(name){
 
         name.checkNormalized();

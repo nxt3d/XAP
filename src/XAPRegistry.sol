@@ -14,6 +14,7 @@ contract XAPRegistry is IXAPRegistry, Controllable {
 
     struct Record {
 
+        // A mapping of chainIdis to addresses 
         mapping(uint=>address) addresses;
         address owner;
 
@@ -23,11 +24,16 @@ contract XAPRegistry is IXAPRegistry, Controllable {
 
     function registerWithOwner(bytes10 name, uint chainId, address _address) external onlyController{
 
-        name.checkNormalized();
         if (available(name)){
             records[name].owner = _address;
             records[name].addresses[chainId] = _address;
         }
+
+    }
+    
+    function register(bytes10 name, uint chainId, address _address) external onlyNameOwner(name){
+
+        records[name].addresses[chainId] = _address;
 
     }
         
@@ -37,12 +43,7 @@ contract XAPRegistry is IXAPRegistry, Controllable {
 
     }
 
-    function register(bytes10 name, uint chainId, address _address) external onlyNameOwner(name){
 
-        name.checkNormalized();
-        records[name].addresses[chainId] = _address;
-
-    }
 
     function resolve(bytes10 name, uint chainId) external view returns (address){
 

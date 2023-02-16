@@ -30,8 +30,6 @@ interface IXAPRegistry{
 
     function setAccountData(bytes32 name, uint96 accountData) external;
 
-    function setAddressData(bytes32 name, uint256 chainId, uint96 addressData) external;
-
     function resolveAddress(bytes32 name, uint256 chainId) external view returns (address);
 
     function resolveAddressWithData(bytes32 name, uint256 chainId) external view returns (address, uint96);

@@ -243,37 +243,6 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
     }
     
     /**
-    * @dev The function sets address data of an address.
-    * @param name The name to be registered.
-    * @param chainId The chainId on which the address will be registered.
-    * @param addressData The auxiliary data of the address.
-    */    
-
-    function setAddressData(
-        bytes32 name, 
-        uint256 chainId, 
-        uint96 addressData
-    ) external onlyAuthorized(name){
-
-        
-        // Retrive the address.
-        (address _address, uint96 _oldAddressData) = _decodeData(records[name].addresses[chainId]);
-
-        // Make sure the address is not the zero address
-        if(_address == address(0)){
-            revert MustHaveNonZeroAddress();
-        }
-
-        // Make sure the address data is not already set.
-        if( _oldAddressData > 0){
-            revert ImmutableRecord(name, chainId, addressData);
-        }
-
-        records[name].addresses[chainId] = _packData(_address, addressData);
-
-    }
-
-    /**
     * @dev The function resolves an address associated with a name on a specific chain.
     * @param name The name for which the address will be resolved.
     * @param chainId The chainId on which the address is registered.

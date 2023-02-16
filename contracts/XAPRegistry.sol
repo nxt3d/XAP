@@ -12,6 +12,9 @@ error Unauthorized(bytes32 name);
 error NotAvailable(bytes32 name);
 error AccountImmutable(bytes32 name, uint256 chainId, address account);
 error CannotSetOwnerToZeroAddress();
+error MustHaveNonZeroAddress();
+error ImmutableRecord(bytes32 name, uint256 chainId, uint96 addressData);
+error CannotDelegateToSelf();
 
 contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
 
@@ -64,10 +67,10 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
      * @dev Allows for approving a single operator.
      */
     function setApprovalForAll(address operator) external {
-        require(
-            msg.sender != operator,
-            "Setting approval status for self"
-        );
+
+        if(msg.sender == operator){
+            revert CannotDelegateToSelf();         
+        }
 
         _operatorApprovals[msg.sender] = operator;
         emit ApprovalForAll(msg.sender, operator);
@@ -88,10 +91,10 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
      * @dev Approve a delegate to be able to updated records on a name.
      */
     function approve(bytes32 name, address delegate) external {
-        require(
-            msg.sender != delegate,
-            "Setting delegate status for self"
-        );
+
+        if(msg.sender == delegate){
+            revert CannotDelegateToSelf();         
+        }
 
         _tokenApprovals[msg.sender][name] = delegate;
         emit Approved(msg.sender, name, delegate);
@@ -252,8 +255,20 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
         uint96 addressData
     ) external onlyAuthorized(name){
 
-        //Retrive the address.
-        (address _address, ) = _decodeData(records[name].addresses[chainId]);
+        
+        // Retrive the address.
+        (address _address, uint96 _oldAddressData) = _decodeData(records[name].addresses[chainId]);
+
+        // Make sure the address is not the zero address
+        if(_address == address(0)){
+            revert MustHaveNonZeroAddress();
+        }
+
+        // Make sure the address data is not already set.
+        if( _oldAddressData > 0){
+            revert ImmutableRecord(name, chainId, addressData);
+        }
+
         records[name].addresses[chainId] = _packData(_address, addressData);
 
     }

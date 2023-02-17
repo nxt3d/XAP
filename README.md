@@ -8,18 +8,18 @@ A Solidity Registry of Human-Readable Names for Cross-Chain Communication
 
 XAP is a Solidity registry designed to simplify cross-chain communication by providing a single human-readable address that works across all compatible blockchains. For example, Uniswap's UniversalRouter has different addresses on different blockchains, making it difficult to remember and use. However, with XAP, you can use a simple, human-readable name that refers to the UniversalRouter on every chain it's deployed to, such as uniswap-ur.xap.eth.
 
-One of the key advantages of XAP is its immutability. XAP names are permanent and unchanging, making them an ideal substitute for addresses in many situations. Additionally, unlike ENS, which uses name hashes, XAP names use human-readable bytes as token IDs. As a result, short XAP names can be stored on-chain using significantly fewer bytes than a full address. For example, you could register 'uniur' as a short name for the Uniswap UniversalRouter. This would allow any smart contract to reference the Uniswap contract by its XAP name and retrieve the full address only when necessary.
+One of the key advantages of XAP is its immutability. XAP names are permanent and unchanging, making them an ideal substitute for addresses in many situations. Additionally, unlike ENS, which uses namehashes, XAP names use human-readable bytes as token ids. As a result, short XAP names can be stored on-chain using significantly fewer bytes than a full address. For example, you could register 'uniur' as a short name for the Uniswap UniversalRouter. This would allow any smart contract to reference the Uniswap contract by its XAP name and retrieve the full address only when necessary.
 
 ## How is XAP different than ENS?
 
-XAP is it's own separate registry from ENS with several differences. One key difference is that XAP is immutable by default, while ENS is mutable. XAP uses human-readable names as IDs instead of name hashes, which enables names to be stored on-chain based on the length of the name in bytes. In contrast, ENS uses name hashes, which are always a fixed length of 32 bytes, making it more difficult to store short names on-chain. XAP leverages ENS to ensure that every XAP account is a subname of 'xap.eth', e.g., 'nifty.xap.eth'.
+XAP is it's own separate registry from ENS with several differences. One key difference is that XAP is immutable by default, while ENS is mutable. XAP uses human-readable names as ids instead of namehashes, which enables names to be stored on-chain based on the length of the name in bytes. In contrast, ENS uses namehashes, which are always a fixed length of 32 bytes, making it more difficult to store short names on-chain. XAP leverages ENS to ensure that every XAP account is a subname of 'xap.eth', e.g., 'nifty.xap.eth'.
 
 
 ## XAPRegistry
 
-The XAP registry is the central contract that forms the core of the XAP protocol. All XAP lookups begin by querying the registry. The registry maintains a list of names, with each name associated with an owner, account data, and a mapping of chain IDs to addresses and address data. Once registered with a chain ID, these mapped addresses become immutable and cannot be changed.
+The XAP registry is the central contract that forms the core of the XAP protocol. All XAP lookups begin by querying the registry. The registry maintains a list of names, with each name associated with an owner, account data, and a mapping of chain ids to addresses and address data. Once registered with a chain id, these mapped addresses become immutable and cannot be changed.
 
-At the heart of the XAP registry is the mapping of chain IDs to records:
+At the heart of the XAP registry is the mapping of chain ids to records:
 ```
     struct Record {
         uint256 owner;
@@ -36,10 +36,10 @@ At the heart of the XAP registry is the mapping of chain IDs to records:
 
 This contract implements the following functionality:
 
-- The owner of a name or an authorized caller can register a name with any chain ID.
+- The owner of a name or an authorized caller can register a name with any chain id.
 - The owner of a name or an authorized caller can transfer ownership to another address.
 - The owner of a name or an authorized caller can change the account data.
-- The registered addresses and address data of a chain ID associated with a name are immutable and cannot be modified by anyone.
+- The registered addresses and address data of a chain id associated with a name are immutable and cannot be modified by anyone.
 
 ## XAPRegistrar
 
@@ -79,7 +79,7 @@ forge test
 ```
 //SPDX-License-Identifier: MIT
 
-ipragma solidity ^0.8.17;
+pragma solidity ^0.8.17;
 
 import "xap/contracts/IXAPRegistry.sol";
 

@@ -3,7 +3,6 @@
 pragma solidity ^0.8.17;
 
 import {Controllable} from "./Controllable.sol";
-import {Normalize} from "./Normalize.sol";
 import {IXAPRegistry} from "./IXAPRegistry.sol";
 import {IERC165} from "openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
 import "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
@@ -17,8 +16,6 @@ error ImmutableRecord(bytes32 name, uint256 chainId, uint96 addressData);
 error CannotDelegateToSelf();
 
 contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
-
-    using Normalize for bytes32;
 
     struct Record {
 
@@ -330,6 +327,7 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
             super.supportsInterface(interfaceId);
     }
 
+    //Check whether the sender is authorized to access the function.
     modifier onlyAuthorized(bytes32 name){
 
         if (isAuthorized(name)){
@@ -347,6 +345,10 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
             isApprovedFor(owner, name, msg.sender);
     }
 
+
+    // Decode the data that is stored in a token. 
+    // The first 160 bits of data is the token owner's address.
+    // The last 96 bits of data is the token's auxdata.
 
     function _decodeData(uint256 data)
         internal

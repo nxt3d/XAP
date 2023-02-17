@@ -146,22 +146,6 @@ contract XAPRegistryTest is Test{
 
     }
 
-    // Test the setAddressData function.
-    function test_008____setAddressData______________AddressDataIsSetCorrectly() public {
-
-        // Set up a XAP address.
-        xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
-        assertEq(xap.getOwner(bytes10(bytes("addr-two"))), account2);
-
-        // Set the address data of the subname.
-        xap.setAddressData(bytes10(bytes("addr-two")), 60, uint96(2334556));
-
-        // Check to make sure the address data is correct.
-        (, uint96 addressData) = xap.resolveAddressWithData(bytes10(bytes("addr-two")), 60);
-        assertEq(addressData, uint96(2334556));
-
-    }
-
     // Test the resolveAddress function.
     function test_009____resolveAddress______________AddressIsResolvedCorrectly() public {
 
@@ -175,11 +159,8 @@ contract XAPRegistryTest is Test{
     function test_010____resolveAddressWithData______AddressAndDataAreResolvedCorrectly() public {
 
         // Set up a XAP address.
-        xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
+        xap.registerWithData(bytes10(bytes("addr-two")), account2, uint96(1223445), 60, account2, uint96(2334556)); 
         assertEq(xap.resolveAddress(bytes10(bytes("addr-two")), 60), account2);
-
-        // Set the address data of the name.
-        xap.setAddressData(bytes10(bytes("addr-two")), 60, uint96(2334556));
 
         // Check to make sure the address data is correct.
         (address resolvedAddress, uint96 resolvedData) = 

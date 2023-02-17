@@ -92,6 +92,19 @@ contract XAPResolverTest is Test{
         // Check that the address is correct.
         bool areEqual = equalStrings(string(resolvedContentHash), outString);
         assertEq(areEqual, true);
+    }    
+    
+    // Test the supportsInterface function.
+    function test_004____supportsInterface___________SupportsCorrectInterfaces() public {
+
+        // Check for the ISubnameWrapper interface.  
+        assertEq(resolver.supportsInterface(type(IXAPResolver).interfaceId), true);
+
+        // Check for the ISubnameWrapper interface.  
+        assertEq(resolver.supportsInterface(type(IExtendedResolver).interfaceId), true);
+
+        // Check for the IERC165 interface.  
+        assertEq(resolver.supportsInterface(type(IERC165).interfaceId), true);
     }
 
     /**

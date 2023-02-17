@@ -16,7 +16,7 @@ import "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
 error CannotResolve(bytes4 selector);
 
 
-contract XAPResolver is ERC165, IExtendedResolver{
+contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
 
     // addr(bytes32 node, uint256 coinType) public view virtual override returns (bytes memory) 
     // => addr(bytes32,uint256) => 0xf1cb7e06
@@ -38,6 +38,7 @@ contract XAPResolver is ERC165, IExtendedResolver{
     function resolve(bytes calldata name, bytes calldata data)
         external
         view
+        override (IExtendedResolver, IXAPResolver)
         returns (bytes memory, address)
     {
 
@@ -115,6 +116,7 @@ contract XAPResolver is ERC165, IExtendedResolver{
     {
         return
             interfaceId == type(IXAPResolver).interfaceId ||
+            interfaceId == type(IExtendedResolver).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 

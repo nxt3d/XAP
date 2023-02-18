@@ -230,7 +230,7 @@ contract XAPRegistrytxt is Test{
         uint256 _maxChars
     ) 
     */
-    function test_011____GetRandomName______________ReturnsARandomName() public view {
+    function test_011____GetRandomName_______________ReturnsARandomName() public view {
 
         for (uint256 i = 0; i < 10; i++) {
 
@@ -246,8 +246,38 @@ contract XAPRegistrytxt is Test{
 
     }
 
+    // Test the function 'withdraw'.
+    function test_012____Withdraw____________________WithdrawsTheBalance() public {
+
+        // Make a commitment to register a name.    
+        bytes32 commitment = xapRegistrar.makeCommitment(bytes32(bytes("addr-123")), account, bytes32(bytes5(0x1234567890))); 
+
+        // save the account balance. 
+        uint256 accountBalance = account.balance;
+
+        // Save the commitment.
+        xapRegistrar.commit(commitment);
+
+        // Move forward 60 seconds in time. 
+        skip(60);
+
+        // Register the name, sending 1 ETH, which is more ether than needed. A refund will occur if successful.
+        xapRegistrar.claim{value: 1000000000000000000}(bytes32(bytes("addr-123")), block.chainid, account2, bytes32(bytes5(0x1234567890)));
+
+        // Check to make sure the correct amount of ether was sent to the registrar.
+        assertEq(address(xapRegistrar).balance, 15295758792002153);
+
+        // Check to make sure the balance of 'account' is correct.
+        assertEq(account.balance, accountBalance - 15295758792002153);
+
+        // Withdraw the balance.
+        xapRegistrar.withdraw();
+        assertEq(address(xapRegistrar).balance, 0);
+        assertEq(account.balance, accountBalance);
+    }
+
     // Test the function 'supportsInterface'.
-    function test_012____SupportsInterface__________ReturnsTrue() public {
+    function test_013____SupportsInterface___________ReturnsTrue() public {
 
         // Check to make sure the interface is supported.
         assertEq(xapRegistrar.supportsInterface(type(IXAPRegistrar).interfaceId), true);

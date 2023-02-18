@@ -299,6 +299,18 @@ contract XAPRegistrar is IXAPRegistrar, ERC165, Ownable{
         // If we can't find a name, revert.
         revert NoNameFoundAfterNAttempts(maxLoops);
     }
+    
+    /**
+    * @dev Allows the contract owner to withdraw the entire balance of the contract.
+    * @notice This function can only be called by the contract owner.
+    * @notice Before calling this function, ensure that the contract balance is greater than zero.
+    */
+    function withdraw() public onlyOwner {
+        require(address(this).balance > 0, "Contract balance must be greater than zero.");
+        address payable owner = payable(msg.sender);
+        (bool success, ) = owner.call{value: address(this).balance}("");
+        require(success, "Withdrawal failed.");
+    }
 
     /**
      * @dev See {IERC165-supportsInterface}.

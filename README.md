@@ -19,9 +19,9 @@ XAP is it's own separate registry from ENS with several differences. One key dif
 
 ## XAPRegistry
 
-The XAP registry is the central contract that forms the core of the XAP protocol. All XAP lookups begin by querying the registry. The registry maintains a list of names, with each name associated with an owner, account data, and a mapping of chain ids to addresses and address data. Once registered with a chain id, these mapped addresses become immutable and cannot be changed.
+The XAP registry is the central contract that forms the core of the XAP protocol. All XAP lookups query the registry. The registry maintains a list of names, with each name associated with an owner, account data, and a mapping of chain ids to addresses and address data. Once registered with a chain id, these mapped addresses become immutable and cannot be changed. Because XAP addresses are always immutable, it is also possible to cache addresses without any loss of security or functionality.
 
-At the heart of the XAP registry is the mapping of chain ids to records:
+At the heart of the XAP registry is the mapping of names to records, wherein each record has a mapping of chain ids to addresses:
 ```
     struct Record {
         uint256 owner;

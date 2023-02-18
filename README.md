@@ -10,6 +10,8 @@ XAP is a Solidity registry designed to simplify cross-chain communication by pro
 
 One of the key advantages of XAP is its immutability. XAP names are permanent and unchanging, making them an ideal substitute for addresses in many situations. Additionally, unlike ENS, which uses namehashes, XAP names use human-readable bytes as token ids. As a result, short XAP names can be stored on-chain using significantly fewer bytes than a full address. For example, you could register 'uniur' as a short name for the Uniswap UniversalRouter. This would allow any smart contract to reference the Uniswap contract by its XAP name and retrieve the full address only when necessary.
 
+XAP names never expire! Once a name is registered, it becomes the property of the owner who can register new addresses under new chain IDs, but cannot modify previously registered addresses. To maintain simplicity in the registry, XAP names are not represented as NFTs.
+
 ## How is XAP different than ENS?
 
 XAP is it's own separate registry from ENS with several differences. One key difference is that XAP is immutable by default, while ENS is mutable. XAP uses human-readable names as ids instead of namehashes, which enables names to be stored on-chain based on the length of the name in bytes. In contrast, ENS uses namehashes, which are always a fixed length of 32 bytes, making it more difficult to store short names on-chain. XAP leverages ENS to ensure that every XAP account is a subname of 'xap.eth', e.g., 'nifty.xap.eth'.

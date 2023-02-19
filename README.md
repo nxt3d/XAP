@@ -68,6 +68,7 @@ The XAP resolver implements an ENS wildcard resolver that enables the resolution
 ```
 git clone https://github.com/nxt3d/xap
 cd xap
+git submodule update --init --recursive
 ```
 
 ### How to run tests

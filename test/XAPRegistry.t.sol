@@ -54,7 +54,7 @@ contract XAPRegistryTest is Test{
 
     }
 
-    function test_001____register____________________RegisteringANameWithAZeroAddressReverts() public {
+    function test_002____register____________________RegisteringANameWithAZeroAddressReverts() public {
 
         // Check to make sure the setting the owner to address 0 reverts.
         vm.expectRevert(ZeroAddressOwner.selector);
@@ -71,7 +71,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the supportsInterface function.
-    function test_002____supportsInterface___________SupportsCorrectInterfaces() public {
+    function test_003____supportsInterface___________SupportsCorrectInterfaces() public {
 
         // Check for the ISubnameWrapper interface.  
         assertEq(xap.supportsInterface(type(IXAPRegistry).interfaceId), true);
@@ -81,7 +81,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the registerWithData function with address 0.
-    function test_003____registerWithData____________RegisteringANameWithAZeroAddressReverts() public {
+    function test_004____registerWithData____________RegisteringANameWithAZeroAddressReverts() public {
 
         uint96 accountData = uint96(0x01);
         uint96 addressData = uint96(0x02);
@@ -100,7 +100,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the registerWithData function.
-    function test_003____registerWithData____________RegisterAXAPAddress() public {
+    function test_005____registerWithData____________RegisterAXAPAddress() public {
 
         uint96 accountData = uint96(0x01);
         uint96 addressData = uint96(0x02);
@@ -124,7 +124,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the registerAddress function.
-    function test_004____registerAddress_____________RegisterAXAPAddress() public {
+    function test_006____registerAddress_____________RegisterAXAPAddress() public {
 
         // The current caller 'account' has been set as a controller so it can register a subname.
         // Set up a XAP address.
@@ -138,7 +138,7 @@ contract XAPRegistryTest is Test{
     }  
     
     // Test the registerAddress function.
-    function test_004____registerAddress_____________ZeroAddressesCannotBeRegistered() public {
+    function test_007____registerAddress_____________ZeroAddressesCannotBeRegistered() public {
 
         // The current caller 'account' has been set as a controller so it can register a subname.
         // Set up a XAP address.
@@ -148,7 +148,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the registerAddressWithData function.
-    function test_005____registerAddressWithData_____RegisterAXAPAddressWithAccountData() public {
+    function test_008____registerAddressWithData_____RegisterAXAPAddressWithAccountData() public {
 
         // Set up a XAP address.
         xap.registerAddressWithData(bytes10(bytes("addr-two")), 60, account2, uint96(2334556)); 
@@ -165,7 +165,7 @@ contract XAPRegistryTest is Test{
     }
     
     // Test the registerAddressWithData function.
-    function test_005____registerAddressWithData_____ZeroAddressesCannotBeRegistered() public {
+    function test_009____registerAddressWithData_____ZeroAddressesCannotBeRegistered() public {
 
         // Check to make sure the setting the owner to address 0 reverts.
         vm.expectRevert(ZeroAddress.selector);
@@ -173,7 +173,7 @@ contract XAPRegistryTest is Test{
     }
     
     // Test the setOwner function.
-    function test_006____setOwner____________________OwnerIsSetCorrectly() public {
+    function test_010____setOwner____________________OwnerIsSetCorrectly() public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
@@ -188,7 +188,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the setOwner function.
-    function test_006____setOwner____________________ZeroAddressesCannotBeSet() public {
+    function test_011____setOwner____________________ZeroAddressesCannotBeSet() public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
@@ -201,7 +201,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the setAccountData function.
-    function test_007____setAccountData______________AccountDataIsSetCorrectly() public {
+    function test_012____setAccountData______________AccountDataIsSetCorrectly() public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
@@ -217,7 +217,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the resolveAddress function.
-    function test_009____resolveAddress______________AddressIsResolvedCorrectly() public {
+    function test_013____resolveAddress______________AddressIsResolvedCorrectly() public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
@@ -226,7 +226,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the resolveAddressWithData function.
-    function test_010____resolveAddressWithData______AddressAndDataAreResolvedCorrectly() public {
+    function test_014____resolveAddressWithData______AddressAndDataAreResolvedCorrectly() public {
 
         // Set up a XAP address.
         xap.registerWithData(bytes10(bytes("addr-two")), account2, uint96(1223445), 60, account2, uint96(2334556)); 
@@ -241,7 +241,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the getOwner function.
-    function test_011____getOwner____________________OwnerIsRetrievedCorrectly(address owner) public {
+    function test_015____getOwner____________________OwnerIsRetrievedCorrectly(address owner) public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
@@ -254,7 +254,7 @@ contract XAPRegistryTest is Test{
     }    
     
     // Test the getOwnerWithData function.
-    function test_012____getOwnerWithData____________OwnerAndDataAreRetrievedCorrectly(bytes32 name, uint96 data) public {
+    function test_016____getOwnerWithData____________OwnerAndDataAreRetrievedCorrectly(bytes32 name, uint96 data) public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
@@ -287,7 +287,7 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the available function.
-    function test_013____available___________________NameIsAvailable(bytes32 name) public {
+    function test_017____available___________________NameIsAvailable(bytes32 name) public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 

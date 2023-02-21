@@ -10,7 +10,8 @@ import "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
 error Unauthorized(bytes32 name);
 error NotAvailable(bytes32 name);
 error AccountImmutable(bytes32 name, uint256 chainId, address account);
-error CannotSetOwnerToZeroAddress();
+error ZeroAddressOwner();
+error ZeroAddress();
 error MustHaveNonZeroAddress();
 error ImmutableRecord(bytes32 name, uint256 chainId, uint96 addressData);
 error CannotDelegateToSelf();
@@ -124,6 +125,16 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
         address _address
     ) external onlyController{
 
+        // Check to make sure the owner is not the zero address.
+        if(_owner == address(0)){
+            revert ZeroAddressOwner();
+        }
+
+        // Check to make sure the address is not the zero address.
+        if(_address == address(0)){
+            revert ZeroAddress();
+        }
+
         // Check to make sure the name has not already been registered. 
         (address oldOwner, ) = _decodeData(records[name].owner); 
         if (oldOwner != address(0)){
@@ -153,6 +164,16 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
         uint96 addressData 
     ) external onlyController{
 
+        // Check to make sure the owner is not the zero address.
+        if(_owner == address(0)){
+            revert ZeroAddressOwner();
+        }
+
+        // Check to make sure the address is not the zero address.
+        if(_address == address(0)){
+            revert ZeroAddress();
+        }
+
         // Check to make sure the name has not already been registered. 
         (address oldOwner, ) = _decodeData(records[name].owner); 
         if (oldOwner != address(0)){
@@ -171,6 +192,11 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
     * @param _address The account to be registered with the name.
     */ 
     function registerAddress(bytes32 name, uint256 chainId, address _address) external onlyAuthorized(name){
+
+        // Check to make sure the address is not the zero address.
+        if(_address == address(0)){
+            revert ZeroAddress();
+        }
 
         // Make sure the address is not set. Accounts are immutable. 
         address account = resolveAddress(name, chainId);
@@ -195,6 +221,11 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
         uint96 addressData
     ) external onlyAuthorized(name){
 
+        // Check to make sure the address is not the zero address.
+        if(_address == address(0)){
+            revert ZeroAddress();
+        }
+
         // Make sure the address is not set. Account addresses are immutable.
 
         address account = resolveAddress(name, chainId);
@@ -216,7 +247,7 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
 
         // Make sure the address is not the zero address.
         if (_address == address(0)){
-            revert CannotSetOwnerToZeroAddress();
+            revert ZeroAddressOwner();
         }
 
         // Retrieve the accountData.

@@ -41,12 +41,32 @@ contract XAPRegistryTest is Test{
     function test2000______________________________XAP_REGISTRY_______________________________() public {}
     function test3000_________________________________________________________________________() public {}
 
-    function test_001____register____________________RegisterAXAPAddress() public {
+    function test_001____register____________________RegisterAXAPAddress(bytes32 name) public {
 
         // The current caller 'account' has been set as a controller so it can register a subname.
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, block.chainid, account2); 
         assertEq(xap.resolveAddress(bytes10(bytes("addr-two")), block.chainid), account2);
+
+        // Check the register function this time using fuzzing.
+        xap.register(name, account2, block.chainid, account2);
+        assertEq(xap.resolveAddress(name, block.chainid), account2);
+
+    }
+
+    function test_001____register____________________RegisteringANameWithAZeroAddressReverts() public {
+
+        // Check to make sure the setting the owner to address 0 reverts.
+        vm.expectRevert(ZeroAddressOwner.selector);
+        xap.register(bytes10(bytes("addr-two")), address(0), block.chainid, account); 
+
+        // Check to make sure the setting the address to address 0 reverts.
+        vm.expectRevert(ZeroAddress.selector);
+        xap.register(bytes10(bytes("addr-two")), account2, block.chainid, address(0)); 
+
+        // Check to make sure the setting the owner and the address to address 0 reverts.
+        vm.expectRevert(ZeroAddressOwner.selector);
+        xap.register(bytes10(bytes("addr-two")), address(0), block.chainid, address(0)); 
 
     }
 
@@ -58,6 +78,25 @@ contract XAPRegistryTest is Test{
 
         // Check for the IERC165 interface.  
         assertEq(xap.supportsInterface(type(IERC165).interfaceId), true);
+    }
+
+    // Test the registerWithData function with address 0.
+    function test_003____registerWithData____________RegisteringANameWithAZeroAddressReverts() public {
+
+        uint96 accountData = uint96(0x01);
+        uint96 addressData = uint96(0x02);
+
+        // Check to make sure the setting the owner to address 0 reverts.
+        vm.expectRevert(ZeroAddressOwner.selector);
+        xap.registerWithData(bytes10(bytes("addr-two")), address(0), accountData, block.chainid, account, addressData); 
+
+        // Check to make sure the setting the address to address 0 reverts.
+        vm.expectRevert(ZeroAddress.selector);
+        xap.registerWithData(bytes10(bytes("addr-two")), account2, accountData, block.chainid, address(0), addressData); 
+
+        // Check to make sure the setting the owner and the address to address 0 reverts.
+        vm.expectRevert(ZeroAddressOwner.selector);
+        xap.registerWithData(bytes10(bytes("addr-two")), address(0), accountData, block.chainid, address(0), addressData); 
     }
 
     // Test the registerWithData function.
@@ -96,6 +135,16 @@ contract XAPRegistryTest is Test{
         vm.expectRevert( abi.encodeWithSelector(AccountImmutable.selector, bytes10(bytes("addr-two")), 60, account2)); 
         xap.registerAddress(bytes10(bytes("addr-two")), 60, account2); 
 
+    }  
+    
+    // Test the registerAddress function.
+    function test_004____registerAddress_____________ZeroAddressesCannotBeRegistered() public {
+
+        // The current caller 'account' has been set as a controller so it can register a subname.
+        // Set up a XAP address.
+        vm.expectRevert(ZeroAddress.selector);
+        xap.registerAddress(bytes10(bytes("addr-two")), 1, address(0)); 
+
     }
 
     // Test the registerAddressWithData function.
@@ -115,6 +164,14 @@ contract XAPRegistryTest is Test{
 
     }
     
+    // Test the registerAddressWithData function.
+    function test_005____registerAddressWithData_____ZeroAddressesCannotBeRegistered() public {
+
+        // Check to make sure the setting the owner to address 0 reverts.
+        vm.expectRevert(ZeroAddress.selector);
+        xap.registerAddressWithData(bytes10(bytes("addr-two")), block.chainid, address(0), uint96(2334556)); 
+    }
+    
     // Test the setOwner function.
     function test_006____setOwner____________________OwnerIsSetCorrectly() public {
 
@@ -127,6 +184,19 @@ contract XAPRegistryTest is Test{
 
         // Check to make sure the owner is correct.
         assertEq(xap.getOwner(bytes10(bytes("addr-two"))), account);
+
+    }
+
+    // Test the setOwner function.
+    function test_006____setOwner____________________ZeroAddressesCannotBeSet() public {
+
+        // Set up a XAP address.
+        xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
+        assertEq(xap.getOwner(bytes10(bytes("addr-two"))), account2);
+
+        // Set the owner of the subname to address 0.
+        vm.expectRevert(ZeroAddressOwner.selector);
+        xap.setOwner(bytes10(bytes("addr-two")), address(0));
 
     }
 
@@ -171,34 +241,53 @@ contract XAPRegistryTest is Test{
     }
 
     // Test the getOwner function.
-    function test_011____getOwner____________________OwnerIsRetrievedCorrectly() public {
+    function test_011____getOwner____________________OwnerIsRetrievedCorrectly(address owner) public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
         assertEq(xap.getOwner(bytes10(bytes("addr-two"))), account2);
 
-    }
+        // This time with fuzzing
+        xap.register(bytes10(bytes("addr-three")), owner, 1, owner);
+        assertEq(xap.getOwner(bytes10(bytes("addr-three"))), owner);
 
+    }    
+    
     // Test the getOwnerWithData function.
-    function test_012____getOwnerWithData____________OwnerAndDataAreRetrievedCorrectly() public {
+    function test_012____getOwnerWithData____________OwnerAndDataAreRetrievedCorrectly(bytes32 name, uint96 data) public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
         assertEq(xap.getOwner(bytes10(bytes("addr-two"))), account2);
 
-        // Set the address data of the name.
+        // Set the account data of the name.
         xap.setAccountData(bytes10(bytes("addr-two")), uint96(2334556));
 
-        // Check to make sure the address data is correct.
+        // Check to make sure the account data is correct.
         (address resolvedOwner, uint96 resolvedData) = 
             xap.getOwnerWithData(bytes10(bytes("addr-two")));
         assertEq(resolvedOwner, account2);
         assertEq(resolvedData, uint96(2334556));
 
+        // This time with fuzzing
+
+        // Set up a XAP address.
+        xap.register(name, account2, 1, account2); 
+        assertEq(xap.getOwner(name), account2);
+
+        // Set the account data of the name.
+        xap.setAccountData(name, data);
+
+        // Check to make sure the account data is correct.
+        (address resolvedOwnerFuzz, uint96 resolvedDataFuzz) = 
+            xap.getOwnerWithData(name);
+        assertEq(resolvedOwnerFuzz, account2);
+        assertEq(resolvedDataFuzz, data);
+
     }
 
     // Test the available function.
-    function test_013____available___________________NameIsAvailable() public {
+    function test_013____available___________________NameIsAvailable(bytes32 name) public {
 
         // Set up a XAP address.
         xap.register(bytes10(bytes("addr-two")), account2, 60, account2); 
@@ -206,6 +295,9 @@ contract XAPRegistryTest is Test{
 
         // Check to make sure the name is available.
         assertEq(xap.available(bytes10(bytes("addr-three"))), true);
+        
+        // Fuzz test a bunch of names, that should all be available.
+        assertEq(xap.available(name), true);
 
     }
 

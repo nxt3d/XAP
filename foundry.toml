@@ -4,4 +4,7 @@ out = 'out'
 libs = ['lib']
 ETH_FROM = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'
 
+[fuzz]
+runs = 256
+
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

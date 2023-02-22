@@ -62,7 +62,7 @@ contract XAPRegistrytxt is Test{
     function test3000_________________________________________________________________________() public {}
 
     // Test the function 'makeCommitment'.
-    function test_001____MakeCommitment______________TheCommitmentWasCreatedCorrectly() public {
+    function test_001____MakeCommitment______________TheCommitmentWasCreatedCorrectly(bytes32 name, bytes32 salt) public {
 
         // Make a commitment to register a name.    
         bytes32 commitment = xapRegistrar.makeCommitment(bytes32(bytes("addr-123")), account, bytes32(bytes5(0x1234567890))); 
@@ -72,10 +72,19 @@ contract XAPRegistrytxt is Test{
 
         // Check to make sure the commitments are the same.
         assertEq(commitment, commitment2);
+
+        // Make a commitment to register a name with fuzzing this time.    
+        bytes32 commitmentFuzz = xapRegistrar.makeCommitment(name, account, salt); 
+
+        // Make a new commitment by encoding the parameters and taking the keccak256 hash.
+        bytes32 commitment2Fuzz = keccak256(abi.encode(name, account, salt));
+
+        // Check to make sure the commitments are the same.
+        assertEq(commitmentFuzz, commitment2Fuzz);
     }
 
     // Test the function 'commmit'.
-    function test_002____Commit______________________CommitWasSavedWithTheTimestamp() public {
+    function test_002____Commit______________________CommitWasSavedWithTheTimestamp(bytes32 name, bytes32 salt) public {
 
         // Make a commitment to register a name.    
         bytes32 commitment = xapRegistrar.makeCommitment(bytes32(bytes("addr-123")), account, bytes32(bytes5(0x1234567890))); 
@@ -85,6 +94,15 @@ contract XAPRegistrytxt is Test{
 
         // Check to make sure the commitment is correct.
         assertEq(xapRegistrar.commitments(commitment), block.timestamp);
+
+         // Make a commitment to register a name with fuzzing this time.    
+        bytes32 commitmentFuzz = xapRegistrar.makeCommitment(name, account, salt); 
+
+        // Save the commitment.
+        xapRegistrar.commit(commitmentFuzz);
+
+        // Check to make sure the commitment is correct.
+        assertEq(xapRegistrar.commitments(commitmentFuzz), block.timestamp);       
     }
 
     // Test the function 'claim'.
@@ -118,8 +136,113 @@ contract XAPRegistrytxt is Test{
         assertEq(xap.resolveAddress(bytes32(bytes("addr-123")), block.chainid), account2);
     }
 
+    // Test the function 'claim'.
+    function test_004____Claim_______________________ClaimFunctionFailsWithBadNames() public {
+
+        // The default minimum length is 7 chacaters.
+        // The default maximum length is 32 chacaters.
+        // The degault minimum number of letters is 3.
+        // The default minimum number of numbers is 3.
+
+        ///////////// Names that should revert /////////////
+        // A name with two dashes (1).
+        registerBadName(bytes32(bytes("addr--123")));
+
+        // A name with two dashes (2).
+        registerBadName(bytes32(bytes("1addr--")));
+
+        // A name with dash at the front.
+        registerBadName(bytes32(bytes("-addr123")));
+
+        // A name with dash at the back.
+        registerBadName(bytes32(bytes("addr123-")));
+
+        // A name with too few characters.
+        registerBadName(bytes32(bytes("addr12")));
+
+        // A name with too few letters.
+        registerBadName(bytes32(bytes("1234567")));
+
+        // A name with too few numbers.
+        registerBadName(bytes32(bytes("abcdefg")));
+
+        // A name with no characters.
+        registerBadName(bytes32(bytes("")));
+
+        // A name with too many characters.
+        registerBadName(bytes32(bytes("123456789012345678901234567890123")));
+
+        // A name with non letters or number characters.
+        registerBadName(bytes32(bytes("addr-123!")));
+
+        // A name with null characters (1).
+        registerBadName(bytes32(bytes("\x00addr123\x00")));
+
+        // A name with null characters (2).
+        registerBadName(bytes32(bytes("addr\x00123")));
+
+        // A name with spaces.
+        registerBadName(bytes32(bytes("addr 123")));
+
+        // A name with capital letters.
+        registerBadName(bytes32(bytes("ADDR123")));
+
+        // A name with underbar.
+        registerBadName(bytes32(bytes("addr_123")));
+
+        // A name with a lattin n with a tilde.
+        registerBadName(bytes32(bytes("addr\xf1123")));
+        
+        ///////////// Names that should NOT revert /////////////
+        // A name with a number at the front.
+        registerName(bytes32(bytes("1addr123")));
+
+        // A name with a number at the back.
+        registerName(bytes32(bytes("addr1231")));
+
+        // A name with a number in the middle.
+        registerName(bytes32(bytes("addr1-23")));
+
+        // A name with lots of dashes.
+        registerName(bytes32(bytes("addr-1-2-3")));
+
+    }
+
+    function registerName(bytes32 name) internal {
+
+        // Make a commitment to register a name.    
+        bytes32 commitment = xapRegistrar.makeCommitment(name, account, bytes32(bytes5(0x1234567890))); 
+
+        // Save the commitment.
+        xapRegistrar.commit(commitment);
+
+        // Move forward 60 seconds in time. 
+        skip(60);
+
+        // Register the name, sending 1 ETH, which is more ether than needed. A refund will occur if successful.
+        xapRegistrar.claim{value: 1000000000000000000}(name, block.chainid, account2, bytes32(bytes5(0x1234567890)));
+
+        assertEq(xap.getOwner(name), account);
+    }
+    function registerBadName(bytes32 name) internal {
+
+        // Make a commitment to register a name.    
+        bytes32 commitment = xapRegistrar.makeCommitment(name, account, bytes32(bytes5(0x1234567890))); 
+
+        // Save the commitment.
+        xapRegistrar.commit(commitment);
+
+        // Move forward 60 seconds in time. 
+        skip(60);
+
+        vm.expectRevert( abi.encodeWithSelector(NameNotNormalized.selector, name));
+        // Register the name, sending 1 ETH, which is more ether than needed. A refund will occur if successful.
+        xapRegistrar.claim{value: 1000000000000000000}(name, block.chainid, account2, bytes32(bytes5(0x1234567890)));
+    }
+    
+
     // Test the function 'setMinimumCharacters'.
-    function test_004____SetMinimumCharacters________MinimumCharacterValuesAreSet() public {
+    function test_005____SetMinimumCharacters________MinimumCharacterValuesAreSet() public {
 
         // Set the minimum letters to 1.
         // Set the minimum numbers to 1.
@@ -133,7 +256,7 @@ contract XAPRegistrytxt is Test{
     }
 
     // Test the function 'setPricingForAllLengths'.
-    function test_005____SetPricingForAllLengths_____PricesAreSetForLengths() public {
+    function test_006____SetPricingForAllLengths_____PricesAreSetForLengths() public {
 
         // Set the pricing for the subname registrar. 
         uint256[] memory charAmounts = new uint256[](10);
@@ -162,7 +285,7 @@ contract XAPRegistrytxt is Test{
     }
 
     // Test the function 'updatePriceForCharLength'.
-    function test_006____UpdatePriceForCharLength____PriceIsUpdated() public {
+    function test_007____UpdatePriceForCharLength____PriceIsUpdated() public {
 
         // Update the price for 3 character names.
         xapRegistrar.updatePriceForCharLength(3, 100000 * 1e18);
@@ -172,7 +295,7 @@ contract XAPRegistrytxt is Test{
     }
 
     // Test the function 'addNextPriceForCharLength'.
-    function test_007____AddNextPriceForCharLength___PriceIsAdded() public {
+    function test_008____AddNextPriceForCharLength___PriceIsAdded() public {
 
         // Add the next price .
         xapRegistrar.addNextPriceForCharLength(100000 * 1e18);
@@ -182,14 +305,14 @@ contract XAPRegistrytxt is Test{
     }
 
     // Test the function 'getLastCharIndex'.
-    function test_008____GetLastCharIndex____________ReturnsTheLastCharIndex() public {
+    function test_009____GetLastCharIndex____________ReturnsTheLastCharIndex() public {
 
         // Check to make sure the last char index is correct.
         assertEq(xapRegistrar.getLastCharIndex(), 9);
     }
 
     // Test the function 'setMinMaxCommitmentAge'.
-    function test_009____SetMinMaxCommitmentAge______MinMaxCommitmentAgeIsSet() public {
+    function test_010____SetMinMaxCommitmentAge______MinMaxCommitmentAgeIsSet() public {
 
         // Set the minimum commitment age to 1 second.
         // Set the maximum commitment age to 1 year.
@@ -203,7 +326,7 @@ contract XAPRegistrytxt is Test{
     }
 
     // Test the function 'getMinimums'.
-    function test_010____GetMinimums_________________ReturnsTheMinimums() public {
+    function test_011____GetMinimums_________________ReturnsTheMinimums() public {
 
         // Set the minimum letters to 1.
         // Set the minimum numbers to 1.
@@ -230,7 +353,7 @@ contract XAPRegistrytxt is Test{
         uint256 _maxChars
     ) 
     */
-    function test_011____GetRandomName_______________ReturnsARandomName() public view {
+    function test_012____GetRandomName_______________ReturnsARandomName() public view {
 
         for (uint256 i = 0; i < 10; i++) {
 
@@ -247,7 +370,7 @@ contract XAPRegistrytxt is Test{
     }
 
     // Test the function 'withdraw'.
-    function test_012____Withdraw____________________WithdrawsTheBalance() public {
+    function test_013____Withdraw____________________WithdrawsTheBalance() public {
 
         // Make a commitment to register a name.    
         bytes32 commitment = xapRegistrar.makeCommitment(bytes32(bytes("addr-123")), account, bytes32(bytes5(0x1234567890))); 
@@ -277,7 +400,7 @@ contract XAPRegistrytxt is Test{
     }
 
     // Test the function 'supportsInterface'.
-    function test_013____SupportsInterface___________ReturnsTrue() public {
+    function test_014____SupportsInterface___________ReturnsTrue() public {
 
         // Check to make sure the interface is supported.
         assertEq(xapRegistrar.supportsInterface(type(IXAPRegistrar).interfaceId), true);

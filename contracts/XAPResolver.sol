@@ -1,6 +1,5 @@
 //SPDX-License-Identifier: MIT 
-
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 import "forge-std/console.sol";
 import {IExtendedResolver} from "./IExtendedResolver.sol";
@@ -9,9 +8,9 @@ import {IXAPResolver} from "./IXAPResolver.sol";
 import {BytesUtilsXAP} from "./BytesUtilsXAP.sol";
 import {IERC165} from "openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
 import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
-import "openzeppelin-contracts/contracts/utils/Strings.sol";
+import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 
-import "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
 
 error CannotResolve(bytes4 selector);
 

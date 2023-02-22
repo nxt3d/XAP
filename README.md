@@ -26,7 +26,7 @@ At the heart of the XAP registry is the mapping of names to records, wherein eac
     struct Record {
         uint256 owner;
         // A mapping of chain ids to addresses and data (stored as a single uint256). 
-        mapping(uint256=>uint256) addresses;
+        mapping(uint256 chainId => uint256 addressAndData) addresses;
     }
 
     /**

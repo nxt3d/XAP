@@ -299,7 +299,7 @@ contract XAPRegistrar is IXAPRegistrar, ERC165, Ownable{
         // If we can't find a name, revert.
         revert NoNameFoundAfterNAttempts(maxLoops);
     }
-    
+
     /**
     * @dev Allows the contract owner to withdraw the entire balance of the contract.
     * @notice This function can only be called by the contract owner.

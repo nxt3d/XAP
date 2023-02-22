@@ -1,11 +1,10 @@
 //SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 import {Controllable} from "./Controllable.sol";
 import {IXAPRegistry} from "./IXAPRegistry.sol";
 import {IERC165} from "openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
-import "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
 
 error Unauthorized(bytes32 name);
 error NotAvailable(bytes32 name);
@@ -21,7 +20,7 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
 
         uint256 owner;
         // A mapping of chain ids to addresses and data (stored as a single uint256). 
-        mapping(uint256=>uint256) addresses;
+        mapping(uint256 chainId => uint256 addressAndData) addresses;
 
     }
 

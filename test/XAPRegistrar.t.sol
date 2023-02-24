@@ -253,6 +253,25 @@ contract XAPRegistrytxt is Test{
         assertEq(xapRegistrar.minLetters(), 1);
         assertEq(xapRegistrar.minNumbers(), 1);
         assertEq(xapRegistrar.minCharacters(), 20);
+
+        // Set the minimum characters to 0
+
+        xapRegistrar.setMinimumCharacters(0, 0, 0);
+
+        // Check to make sure the minimum characters is correct.
+        assertEq(xapRegistrar.minLetters(), 0);
+        assertEq(xapRegistrar.minNumbers(), 0);
+        assertEq(xapRegistrar.minCharacters(), 0);
+
+        // Register a single letter name
+        registerName("a");
+
+        // Register a single letter name
+        registerName("1");
+
+        // Register a name with no characters
+        registerBadName("");
+
     }
 
     // Test the function 'setPricingForAllLengths'.
@@ -260,8 +279,8 @@ contract XAPRegistrytxt is Test{
 
         // Set the pricing for the subname registrar. 
         uint256[] memory charAmounts = new uint256[](10);
-        charAmounts[0] = 0; // (≈$5/year) calculated as $/sec with 18 decimals.
-        // skip 1 and 2 character names becuase they are reseved.
+        charAmounts[0] = 0; // $USD amount with 18 decimals.
+        // skip 1 and 2 character names because they are reseved.
         charAmounts[3] = 120 * 1e18;
         charAmounts[4] = 80 * 1e18;
         charAmounts[5] = 20 * 1e18;
@@ -309,6 +328,13 @@ contract XAPRegistrytxt is Test{
 
         // Check to make sure the last char index is correct.
         assertEq(xapRegistrar.getLastCharIndex(), 9);
+        
+        // Add the next price .
+        xapRegistrar.addNextPriceForCharLength(7 * 1e18);
+
+        // Check to make sure the last char index is correct.
+        assertEq(xapRegistrar.getLastCharIndex(), 10);
+        
     }
 
     // Test the function 'setMinMaxCommitmentAge'.
@@ -353,17 +379,16 @@ contract XAPRegistrytxt is Test{
         uint256 _maxChars
     ) 
     */
-    function test_012____GetRandomName_______________ReturnsARandomName() public view {
+    function test_012____GetRandomName_______________ReturnsARandomName() public {
 
-        for (uint256 i = 0; i < 10; i++) {
+        for (uint256 i = 0; i < 1000; i++) {
 
             //getRandomName( maxLoops, _minNumbers, _minLetters, _numChars, _salt)
 
             // Get a random name.
-            bytes32 randomName = xapRegistrar.getRandomName(6, 2, 2, 9, i);
-
-            // Check to make sure the name is greater than 0.
-            assert(randomName > 0);
+            // This function reverts if a name can't be found
+            bytes32 randomName = xapRegistrar.getRandomName(20, 3, 3, 7, i);
+            registerName(randomName);
 
         }
 
@@ -404,5 +429,8 @@ contract XAPRegistrytxt is Test{
 
         // Check to make sure the interface is supported.
         assertEq(xapRegistrar.supportsInterface(type(IXAPRegistrar).interfaceId), true);
+
+        // Check to make sure the interface is supported.
+        assertEq(xapRegistrar.supportsInterface(type(IERC165).interfaceId), true);
     }
 }

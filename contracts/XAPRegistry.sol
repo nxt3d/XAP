@@ -26,25 +26,22 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
 
     /**
      * A mapping of names to records.
-     * name => Record
      */
-    mapping(bytes32=>Record) records;
+    mapping(bytes32 name => Record record) records;
 
     /**
      * A mapping of operators. An address that is authorized for an address
      * may make any changes to the name that the owner could, but may not update
      * the set of authorisations.
-     * owner => operator
      */
-    mapping(address => address) private _operatorApprovals;
+    mapping(address owner => address operator) private _operatorApprovals;
 
     /**
      * A mapping of delegates. The delegate that is set by an owner
      * for a name may make changes to the name's resolver, but may not update
      * the set of token approvals.
-     * (owner, name) => delegate
      */
-    mapping(address => mapping(bytes32 => address)) private _tokenApprovals; 
+    mapping(address owner => mapping(bytes32 name => address delegate)) private _tokenApprovals; 
 
     // Logged when an operator is added or removed.
     event ApprovalForAll(

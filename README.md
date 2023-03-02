@@ -6,7 +6,7 @@ A Solidity Registry of Human-Readable Names for Cross-Chain Communication
 
 ## What is XAP?
 
-XAP is a Solidity registry designed to simplify cross-chain communication by providing a single human-readable address that works across all compatible blockchains. For example, Uniswap's UniversalRouter has different addresses on different blockchains, making it difficult to remember and use. However, with XAP, you can use a simple, human-readable name that refers to the UniversalRouter on every chain it's deployed to, such as uniswap-ur.xap.eth.
+XAP is a Solidity registry designed to simplify cross-chain communication by providing a single human-readable address that works across all compatible blockchains. For example, Uniswap's UniversalRouter has different addresses on different blockchains, making it difficult to remember and use. However, with XAP, you can use a simple, human-readable name that refers to the UniversalRouter on every chain it's deployed to, such as uniswap‑ur.xap.eth.
 
 One of the key advantages of XAP is its immutability. XAP names are permanent and unchanging, making them an ideal substitute for addresses in many situations. Additionally, unlike ENS, which uses namehashes, XAP names use human-readable bytes as token ids. As a result, short XAP names can be stored on-chain using significantly fewer bytes than a full address. For example, you could register 'uniur' as a short name for the Uniswap UniversalRouter. This would allow any smart contract to reference the Uniswap contract by its XAP name and retrieve the full address only when necessary.
 

@@ -121,7 +121,7 @@ contract XAPRegistrytxt is Test{
         skip(60);
 
         // Register the name, sending 1 ETH, which is more ether than needed. A refund will occur if successful.
-        xapRegistrar.claim{value: 1000000000000000000}(bytes32(bytes("addr-123")), block.chainid, account2, bytes32(bytes5(0x1234567890)));
+        xapRegistrar.claim{value: 1000000000000000000}(bytes32(bytes("addr-123")), uint96(bytes12(bytes("this is text"))), block.chainid, account2, uint96(1234567890), bytes32(bytes5(0x1234567890)));
 
         // Check to make sure the correct amount of ether was sent to the registrar.
         assertEq(address(xapRegistrar).balance, 15295758792002153);
@@ -220,7 +220,7 @@ contract XAPRegistrytxt is Test{
         skip(60);
 
         // Register the name, sending 1 ETH, which is more ether than needed. A refund will occur if successful.
-        xapRegistrar.claim{value: 1000000000000000000}(name, block.chainid, account2, bytes32(bytes5(0x1234567890)));
+        xapRegistrar.claim{value: 1000000000000000000}(name, uint96(bytes12(bytes("this is text"))), block.chainid, account2, uint96(1234567890), bytes32(bytes5(0x1234567890)));
 
         assertEq(xap.getOwner(name), account);
     }
@@ -237,7 +237,7 @@ contract XAPRegistrytxt is Test{
 
         vm.expectRevert( abi.encodeWithSelector(NameNotNormalized.selector, name));
         // Register the name, sending 1 ETH, which is more ether than needed. A refund will occur if successful.
-        xapRegistrar.claim{value: 1000000000000000000}(name, block.chainid, account2, bytes32(bytes5(0x1234567890)));
+        xapRegistrar.claim{value: 1000000000000000000}(name, uint96(bytes12(bytes("this is text"))), block.chainid, account2, uint96(1234567890), bytes32(bytes5(0x1234567890)));
     }
     
 
@@ -410,7 +410,7 @@ contract XAPRegistrytxt is Test{
         skip(60);
 
         // Register the name, sending 1 ETH, which is more ether than needed. A refund will occur if successful.
-        xapRegistrar.claim{value: 1000000000000000000}(bytes32(bytes("addr-123")), block.chainid, account2, bytes32(bytes5(0x1234567890)));
+        xapRegistrar.claim{value: 1000000000000000000}(bytes32(bytes("addr-123")), uint96(bytes12(bytes("this is text"))), block.chainid, account2, uint96(1234567890), bytes32(bytes5(0x1234567890)));
 
         // Check to make sure the correct amount of ether was sent to the registrar.
         assertEq(address(xapRegistrar).balance, 15295758792002153);

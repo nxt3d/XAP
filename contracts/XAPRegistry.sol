@@ -3,8 +3,8 @@ pragma solidity ^0.8.18;
 
 import {Controllable} from "./Controllable.sol";
 import {IXAPRegistry} from "./IXAPRegistry.sol";
-import {IERC165} from "openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
-import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 error Unauthorized(bytes32 name);
 error NotAvailable(bytes32 name);

@@ -8,7 +8,7 @@ import "contracts/IXAPRegistry.sol";
 import "contracts/IXAPResolver.sol";
 import "contracts/XAPResolver.sol";
 import "contracts/mocks/USDOracleMock.sol";
-import "openzeppelin-contracts/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract XAPResolverTest is Test{
 
@@ -52,19 +52,34 @@ contract XAPResolverTest is Test{
 
         // Check that the resolver can resolve the address.
         (bytes memory resolvedAddress, ) = 
-            resolver.resolve(bytes("\x0axyz-driver\x03xap\x03eth"), 
-                abi.encodeWithSelector(bytes4(0xf1cb7e06), bytes32(0), uint256(1)));
+            resolver.resolve(bytes("\x0axyz-driver\x03xap\x03eth\x00"), 
+                abi.encodeWithSelector(bytes4(0xf1cb7e06), bytes32(0), uint256(60)));
 
 
         // Check that the address is correct.
         assertEq(address(bytes20(resolvedAddress)), account2);
+
     }
 
-    function test_002____resolve_text________________ResolveTheAccountDataOfAXAPAdress() public {
+    function test_002____resolve_addr________________ResolveAnXAPAddressWithChainId42161AsENSSubname() public {
+
+        xap.registerWithData(bytes32(bytes("abc-driver")), account, 100, 42161, account2, 200); 
+        assertEq(xap.resolveAddress(bytes32(bytes("abc-driver")), 42161), account2);
+
+        // Check that the resolver can resolve the address.
+        (bytes memory resolvedAddress, ) = 
+            resolver.resolve(bytes("\x0aabc-driver\x03xap\x03eth\x00"), 
+                abi.encodeWithSelector(bytes4(0xf1cb7e06), bytes32(0), uint256(0x80000000) | uint256(42161)));
+        // Check that the address is correct.
+        assertEq(address(bytes20(resolvedAddress)), account2);
+
+    }
+
+    function test_003____resolve_text________________ResolveTheAccountDataOfAXAPAdress() public {
 
         // Check that the resolver can resolve the address.
         (bytes memory resolvedAccountData, ) = 
-            resolver.resolve(bytes("\x0axyz-driver\x03xap\x03eth"), 
+            resolver.resolve(bytes("\x0axyz-driver\x03xap\x03eth\x00"), 
                 abi.encodeWithSelector(bytes4(0x59d1d43c), bytes32(0), "xap-account-data"));
 
 
@@ -72,11 +87,11 @@ contract XAPResolverTest is Test{
         assertEq(uint96(bytes12(resolvedAccountData)), 100);
     }
 
-    function test_003____resolve_contenthash_________ResolveTheContentHashOfAXAPAdress() public {
+    function test_004____resolve_contenthash_________ResolveTheContentHashOfAXAPAdress() public {
 
         // Check that the resolver can resolve the address.
         (bytes memory resolvedContentHash, ) = 
-        resolver.resolve(bytes("\x0axyz-driver\x03xap\x03eth"), 
+        resolver.resolve(bytes("\x0axyz-driver\x03xap\x03eth\x00"), 
             abi.encodeWithSelector(bytes4(0xbc1c58d1), bytes32(0)));
 
         // Data URL for the contenthash.
@@ -95,7 +110,7 @@ contract XAPResolverTest is Test{
     }    
     
     // Test the supportsInterface function.
-    function test_004____supportsInterface___________SupportsCorrectInterfaces() public {
+    function test_005____supportsInterface___________SupportsCorrectInterfaces() public {
 
         // Check for the ISubnameWrapper interface.  
         assertEq(resolver.supportsInterface(type(IXAPResolver).interfaceId), true);

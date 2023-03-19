@@ -26,8 +26,10 @@ interface IXAPRegistrar {
 
     function claim(
         bytes32 name, 
+        uint96 accountData,
         uint chainId, 
         address _address,
+        uint96 addressData,
         bytes32 secret
     ) external payable;
 

@@ -76,13 +76,13 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
 
             ( ,string memory key) = abi.decode(data[4:], (bytes32, string));
 
-            if (areStringsEqual(key, "xap-account-data")){
+            if (areStringsEqual(key, "xap-address-data-1")){
 
                 // Get the label of the name
                 (string memory label, ) = name.getFirstLabel();
 
-                ( , uint96 accountData) = xap.getOwnerWithData(bytes32(bytes(label)));
-                return (abi.encodePacked(accountData), address(this));
+                ( , uint96 addressData) = xap.resolveAddressWithData(bytes32(bytes(label)),1);
+                return (abi.encodePacked(addressData), address(this));
             } else {
                 revert CannotResolve(bytes4(selector));
             }
@@ -93,16 +93,16 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
             (string memory label, ) = name.getFirstLabel();
 
             // Get the address data of the Ethereum L1 address.
-            ( address _address, uint96 addressData) = xap.resolveAddressWithData(bytes32(bytes(label)),1);
+            ( address _address, uint96 accountData) = xap.getOwnerWithData(bytes32(bytes(label)));
 
             // Data URL for the contenthash.
             string memory beforeData = "data:text/html,%3Cbr%3E%3Ch2%3E%3Cdiv%20style%3D%22text-align%3Acenter%3B%20font-family%3A%20Arial%2C%20sans-serif%3B%22%3EEtherem%20Mainnet%20Address%3A%20";
-            string memory delimter = "%3Cbr%3EXAP%20Address%20Data%3A%20"; 
+            string memory delimter = "%3Cbr%3EXAP%20Account%20Data%3A%20"; 
             string memory afterData = "%3C%2Fh2%3E%3C%2Fdiv%3E";
 
             string memory outString = string.concat(beforeData,Strings.toHexString(_address));
             outString = string.concat(outString,delimter);
-            outString = string.concat(outString,Strings.toString(addressData));
+            outString = string.concat(outString,Strings.toString(accountData));
             outString = string.concat(outString,afterData);
 
             return (bytes(outString), address(this));

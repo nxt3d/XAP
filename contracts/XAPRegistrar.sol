@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.18;
 
-import "forge-std/console.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Normalize} from "./Normalize.sol";
 import {IXAPRegistry} from "./IXAPRegistry.sol";
@@ -106,7 +105,7 @@ contract XAPRegistrar is IXAPRegistrar, ERC165, Ownable{
     function claim(
         bytes32 name, 
         uint96 accountData, 
-        uint chainId, 
+        uint256 chainId, 
         address _address,
         uint96 addressData, 
         bytes32 secret

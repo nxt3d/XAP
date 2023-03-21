@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.18;
 
-import "forge-std/console.sol";
 import {IExtendedResolver} from "./IExtendedResolver.sol";
 import {IXAPRegistry} from "./IXAPRegistry.sol";
 import {IXAPResolver} from "./IXAPResolver.sol";
@@ -66,6 +65,7 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
             // Get the label of the name
             (string memory label, ) = name.getFirstLabel();
 
+            // Resolve the address of the label on the chain id.
             address resolvedAddress = xap.resolveAddress(bytes32(bytes(label)), cointype_ChainId);
             
             // Return the resolved address.
@@ -74,14 +74,25 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
         } else if (selector == 0x59d1d43c) {
             //Resolve text.
 
+            // Strip off the function selector and decode the ABI encoded function call (data).
             ( ,string memory key) = abi.decode(data[4:], (bytes32, string));
 
-            if (areStringsEqual(key, "xap-address-data-1")){
+            // Split the key into the key and chain id.
+            (bytes memory keyBytes, bytes memory chainId) = bytes(key).splitBytes(17);
+
+            // Convert the chain id to a uint256. 
+            uint256 chainIdInt = chainId.bytesNumberToUint();
+
+            // Check if the key is "xap-address-data-" and the chain id is greater than 0.
+            if (areStringsEqual(string(keyBytes), "xap-address-data-") && chainIdInt > 0){
 
                 // Get the label of the name
                 (string memory label, ) = name.getFirstLabel();
 
-                ( , uint96 addressData) = xap.resolveAddressWithData(bytes32(bytes(label)),1);
+                // Get the address data of the address of the chain id.
+                ( , uint96 addressData) = xap.resolveAddressWithData(bytes32(bytes(label)),chainIdInt);
+
+                // Return the address data.
                 return (abi.encodePacked(addressData), address(this));
             } else {
                 revert CannotResolve(bytes4(selector));
@@ -96,15 +107,17 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
             ( address _address, uint96 accountData) = xap.getOwnerWithData(bytes32(bytes(label)));
 
             // Data URL for the contenthash.
-            string memory beforeData = "data:text/html,%3Cbr%3E%3Ch2%3E%3Cdiv%20style%3D%22text-align%3Acenter%3B%20font-family%3A%20Arial%2C%20sans-serif%3B%22%3EEtherem%20Mainnet%20Address%3A%20";
+            string memory beforeData = "data:text/html,%3Cbr%3E%3Ch2%3E%3Cdiv%20style%3D%22text-align%3Acenter%3B%20font-family%3A%20Arial%2C%20sans-serif%3B%22%3EXAP%20Account%20Owner%3A%20";
             string memory delimter = "%3Cbr%3EXAP%20Account%20Data%3A%20"; 
             string memory afterData = "%3C%2Fh2%3E%3C%2Fdiv%3E";
 
+            // Concatenate the data URL. 
             string memory outString = string.concat(beforeData,Strings.toHexString(_address));
             outString = string.concat(outString,delimter);
             outString = string.concat(outString,Strings.toString(accountData));
             outString = string.concat(outString,afterData);
 
+            // Return the data URL.
             return (bytes(outString), address(this));
 
         } else { 

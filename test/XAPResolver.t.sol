@@ -75,19 +75,33 @@ contract XAPResolverTest is Test{
 
     }
 
-    function test_003____resolve_text________________ResolveTheAccountDataOfAXAPAdress() public {
+    function test_003____resolve_text________________ResolveTheAddressDataOfAXAPAdress() public {
 
         // Check that the resolver can resolve the address.
-        (bytes memory resolvedAccountData, ) = 
+        (bytes memory resolvedAddressData, ) = 
             resolver.resolve(bytes("\x0axyz-driver\x03xap\x03eth\x00"), 
-                abi.encodeWithSelector(bytes4(0x59d1d43c), bytes32(0), "xap-account-data"));
+                abi.encodeWithSelector(bytes4(0x59d1d43c), bytes32(0), "xap-address-data-1"));
 
-
+    
         // Check that the address is correct.
-        assertEq(uint96(bytes12(resolvedAccountData)), 100);
+        assertEq(uint96(bytes12(resolvedAddressData)), 200);
     }
 
-    function test_004____resolve_contenthash_________ResolveTheContentHashOfAXAPAdress() public {
+    function test_004____resolve_text________________ResolveTheAddressDataOfAXAPAdressChainId42161() public {
+
+        xap.registerWithData(bytes32(bytes("abc-driver")), account, 100, 42161, account2, 200); 
+        assertEq(xap.resolveAddress(bytes32(bytes("abc-driver")), 42161), account2);
+
+        // Check that the resolver can resolve the address.
+        (bytes memory resolvedAddressData, ) = 
+            resolver.resolve(bytes("\x0aabc-driver\x03xap\x03eth\x00"), 
+                abi.encodeWithSelector(bytes4(0x59d1d43c), bytes32(0), "xap-address-data-42161"));
+
+    
+        // Check that the address is correct.
+        assertEq(uint96(bytes12(resolvedAddressData)), 200);
+    }
+    function test_005____resolve_contenthash_________ResolveTheContentHashOfAXAPAdress() public {
 
         // Check that the resolver can resolve the address.
         (bytes memory resolvedContentHash, ) = 
@@ -95,13 +109,14 @@ contract XAPResolverTest is Test{
             abi.encodeWithSelector(bytes4(0xbc1c58d1), bytes32(0)));
 
         // Data URL for the contenthash.
-        string memory beforeData = "data:text/html,%3Cbr%3E%3Ch2%3E%3Cdiv%20style%3D%22text-align%3Acenter%3B%20font-family%3A%20Arial%2C%20sans-serif%3B%22%3EEtherem%20Mainnet%20Address%3A%20";
-        string memory delimter = "%3Cbr%3EXAP%20Address%20Data%3A%20"; 
+        string memory beforeData = "data:text/html,%3Cbr%3E%3Ch2%3E%3Cdiv%20style%3D%22text-align%3Acenter%3B%20font-family%3A%20Arial%2C%20sans-serif%3B%22%3EXAP%20Account%20Owner%3A%20";
+
+        string memory delimter = "%3Cbr%3EXAP%20Account%20Data%3A%20"; 
         string memory afterData = "%3C%2Fh2%3E%3C%2Fdiv%3E";
 
-        string memory outString = string.concat(beforeData,Strings.toHexString(account2));
+        string memory outString = string.concat(beforeData,Strings.toHexString(account));
         outString = string.concat(outString,delimter);
-        outString = string.concat(outString,Strings.toString(200));
+        outString = string.concat(outString,Strings.toString(100));
         outString = string.concat(outString,afterData);
 
         // Check that the address is correct.
@@ -110,7 +125,7 @@ contract XAPResolverTest is Test{
     }    
     
     // Test the supportsInterface function.
-    function test_005____supportsInterface___________SupportsCorrectInterfaces() public {
+    function test_006____supportsInterface___________SupportsCorrectInterfaces() public {
 
         // Check for the ISubnameWrapper interface.  
         assertEq(resolver.supportsInterface(type(IXAPResolver).interfaceId), true);

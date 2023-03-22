@@ -1,10 +1,8 @@
 //SPDX-License-Identifier: MIT 
-
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 import {IXAPRegistry} from "./IXAPRegistry.sol";
 import {IAggregatorInterface} from "./IAggregatorInterface.sol";
-
 
 interface IXAPRegistrar {
 
@@ -28,8 +26,10 @@ interface IXAPRegistrar {
 
     function claim(
         bytes32 name, 
+        uint96 accountData,
         uint chainId, 
         address _address,
+        uint96 addressData,
         bytes32 secret
     ) external payable;
 

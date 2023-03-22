@@ -1,11 +1,10 @@
 //SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 import {Controllable} from "./Controllable.sol";
 import {IXAPRegistry} from "./IXAPRegistry.sol";
-import {IERC165} from "openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
-import "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 error Unauthorized(bytes32 name);
 error NotAvailable(bytes32 name);
@@ -21,31 +20,28 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
 
         uint256 owner;
         // A mapping of chain ids to addresses and data (stored as a single uint256). 
-        mapping(uint256=>uint256) addresses;
+        mapping(uint256 chainId => uint256 addressAndData) addresses;
 
     }
 
     /**
      * A mapping of names to records.
-     * name => Record
      */
-    mapping(bytes32=>Record) records;
+    mapping(bytes32 name => Record record) records;
 
     /**
      * A mapping of operators. An address that is authorized for an address
      * may make any changes to the name that the owner could, but may not update
      * the set of authorisations.
-     * owner => operator
      */
-    mapping(address => address) private _operatorApprovals;
+    mapping(address owner => address operator) private _operatorApprovals;
 
     /**
      * A mapping of delegates. The delegate that is set by an owner
      * for a name may make changes to the name's resolver, but may not update
      * the set of token approvals.
-     * (owner, name) => delegate
      */
-    mapping(address => mapping(bytes32 => address)) private _tokenApprovals; 
+    mapping(address owner => mapping(bytes32 name => address delegate)) private _tokenApprovals; 
 
     // Logged when an operator is added or removed.
     event ApprovalForAll(

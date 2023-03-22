@@ -1,13 +1,11 @@
 //SPDX-License-Identifier: MIT 
+pragma solidity ^0.8.18;
 
-pragma solidity ^0.8.17;
-
-import "forge-std/console.sol";
-import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Normalize} from "./Normalize.sol";
 import {IXAPRegistry} from "./IXAPRegistry.sol";
 import {IXAPRegistrar} from "./IXAPRegistrar.sol";
-import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {IAggregatorInterface} from "./IAggregatorInterface.sol";
 
 error MinCharsTooLow();
@@ -106,8 +104,10 @@ contract XAPRegistrar is IXAPRegistrar, ERC165, Ownable{
 
     function claim(
         bytes32 name, 
-        uint chainId, 
+        uint96 accountData, 
+        uint256 chainId, 
         address _address,
+        uint96 addressData, 
         bytes32 secret
         ) external payable{
 
@@ -141,7 +141,7 @@ contract XAPRegistrar is IXAPRegistrar, ERC165, Ownable{
         );
 
        // Register an available name 
-        xap.register(name, msg.sender, chainId, _address);
+        xap.registerWithData(name, msg.sender, accountData, chainId, _address, addressData);
 
         // If the the sender sent more ETH than necessary send the remainder back.
         if (msg.value > (price)) {
@@ -299,7 +299,7 @@ contract XAPRegistrar is IXAPRegistrar, ERC165, Ownable{
         // If we can't find a name, revert.
         revert NoNameFoundAfterNAttempts(maxLoops);
     }
-    
+
     /**
     * @dev Allows the contract owner to withdraw the entire balance of the contract.
     * @notice This function can only be called by the contract owner.

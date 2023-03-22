@@ -3,9 +3,13 @@ cache/
 out/
 
 # Ignores development broadcast logs
-!/broadcast
+broadcast/
 /broadcast/*/31337/
 /broadcast/**/dry-run/
 
 # Dotenv file
-.env
+.env*
+
+# Ignore dev tools
+tools/
+temp/

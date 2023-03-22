@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT 
-pragma solidity ~0.8.17;
+pragma solidity ~0.8.18;
 
 library BytesUtilsXAP {
     /*
@@ -137,4 +137,64 @@ library BytesUtilsXAP {
         return "";
     }
 
+    /**
+     * @dev This funciton will split a bytes array into two parts, the first part will be the bytes before the
+     * index and the second part will be the bytes after the index.
+     * @param bytesArray bytes memory.
+     * @param index uint256.
+     * @return the left and rigth side of the array (the right side includes the index).
+     */
+
+    function splitBytes(bytes memory bytesArray, uint256 index) internal pure returns (bytes memory, bytes memory) {
+
+        // Create a new byte array to hold the first part of the bytes array.
+        bytes memory firstPart = new bytes(index);
+
+        // Create a new byte array to hold the second part of the bytes array.
+        bytes memory secondPart = new bytes(bytesArray.length - index);
+
+        // Copy the first part of the bytes array to the firstPart byte array.
+        for (uint i = 0; i < index; i++) {
+            firstPart[i] = bytesArray[i];
+        }
+
+        // Copy the second part of the bytes array to the secondPart byte array.
+        for (uint i = index; i < bytesArray.length; i++) {
+            secondPart[i - index] = bytesArray[i];
+        }
+
+        // Return the first and second part of the bytes array.
+        return (firstPart, secondPart);
+    }
+
+    /**
+     * @dev Convert a numbers in UTF-8 format into a uint256.
+     *
+     * The input must contain only numeric characters (i.e., characters
+     * with UTF-8 code points between 48 and 57). If the input contains
+     * any non-numeric characters, the function will revert with an error message.
+     *
+     * @param num The input string to convert.
+     * @return result The converted uint256 value.
+     */
+
+    function bytesNumberToUint(bytes memory num) public pure returns (uint256 result) {
+
+        require(num.length > 0, "Input must not be empty");
+
+        for (uint256 i = 0; i < num.length; i++) {
+            uint256 c = uint256(uint8(num[i]));
+            require(c >= 48 && c <= 57, "Input must only contain digits");
+            result = result * 10 + (c - 48);
+        }
+    }
+
 }
+
+
+
+
+
+    
+
+

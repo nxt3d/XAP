@@ -3,5 +3,15 @@ src = 'contracts'
 out = 'out'
 libs = ['lib']
 ETH_FROM = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'
+ffi = true
+
+[fuzz]
+runs = 256
+
+#[rpc_endpoints]
+#goerli = "${GOERLI_RPC_URL}"
+
+#[etherscan]
+#goerli = { key = "${ETHERSCAN_API_KEY}" }
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

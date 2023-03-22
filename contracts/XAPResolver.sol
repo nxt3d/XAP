@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.18;
 
+import "forge-std/console.sol";
 import {IExtendedResolver} from "./IExtendedResolver.sol";
 import {IXAPRegistry} from "./IXAPRegistry.sol";
 import {IXAPResolver} from "./IXAPResolver.sol";
@@ -8,13 +9,14 @@ import {BytesUtilsXAP} from "./BytesUtilsXAP.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 error CannotResolve(bytes4 selector);
 
 
-contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
+contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
 
     // addr(bytes32 node, uint256 coinType) public view virtual override returns (bytes memory) 
     // => addr(bytes32,uint256) => 0xf1cb7e06
@@ -29,9 +31,14 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
     using BytesUtilsXAP for bytes;
 
     IXAPRegistry public xap;
+    bytes public parentName;
 
-    constructor (IXAPRegistry _xap) {
+    // The name of the parent address.
+    address public parentAddress;
+
+    constructor (IXAPRegistry _xap, bytes memory _parentName) {
         xap = _xap;
+        parentName = _parentName;
     }
 
     function resolve(bytes calldata name, bytes calldata data)
@@ -40,6 +47,12 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
         override (IExtendedResolver, IXAPResolver)
         returns (bytes memory, address)
     {
+
+        // Check to see if the name is the same as the parent name.
+        if (areStringsEqual(string(name), string(parentName))){
+
+            return (abi.encodePacked(bytes20(bytes1(0x01))),address(0x01));
+        }
 
         // Read function selector from the data.
         bytes4 selector = bytes4(data[0:4]);
@@ -63,10 +76,20 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
             }
 
             // Get the label of the name
-            (string memory label, ) = name.getFirstLabel();
+            //(string memory label, ) = name.getFirstLabel();
+
+            // Split the name into the label and the parent name.
+            (bytes memory label, bytes memory root) = bytes(name).splitBytes(name.length - parentName.length);
+            // console log label and chainId
+            
+            // Remove the first byte of the label (the length of the label).
+            ( , label) = label.splitBytes(1);
+
+            // Make sure the root matches the defined parent name.
+            require(areStringsEqual(string(root), string(parentName)), "Invalid root name");
 
             // Resolve the address of the label on the chain id.
-            address resolvedAddress = xap.resolveAddress(bytes32(bytes(label)), cointype_ChainId);
+            address resolvedAddress = xap.resolveAddress(bytes32(label), cointype_ChainId);
             
             // Return the resolved address.
             return (abi.encodePacked(resolvedAddress), address(this)); 
@@ -86,11 +109,18 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
             // Check if the key is "xap-address-data-" and the chain id is greater than 0.
             if (areStringsEqual(string(keyBytes), "xap-address-data-") && chainIdInt > 0){
 
-                // Get the label of the name
-                (string memory label, ) = name.getFirstLabel();
+                // Split the name into the label and the parent name.
+                (bytes memory label, bytes memory root) = bytes(name).splitBytes(name.length - parentName.length);
+                // console log label and chainId
+                
+                // Remove the first byte of the label (the length of the label).
+                ( , label) = label.splitBytes(1);
+
+                // Make sure the root matches the defined parent name.
+                require(areStringsEqual(string(root), string(parentName)), "Invalid root name");
 
                 // Get the address data of the address of the chain id.
-                ( , uint96 addressData) = xap.resolveAddressWithData(bytes32(bytes(label)),chainIdInt);
+                ( , uint96 addressData) = xap.resolveAddressWithData(bytes32(label),chainIdInt);
 
                 // Return the address data.
                 return (abi.encodePacked(addressData), address(this));
@@ -100,11 +130,19 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
         } else if (selector == 0xbc1c58d1) {
             //Resolve contenthash.
 
-            // Get the label of the name
-            (string memory label, ) = name.getFirstLabel();
+            // Split the name into the label and the parent name.
+            (bytes memory label, bytes memory root) = bytes(name).splitBytes(name.length - parentName.length);
+            // console log label and chainId
+            
+            // Remove the first byte of the label (the length of the label).
+            ( , label) = label.splitBytes(1);
+
+            // Make sure the root matches the defined parent name.
+            require(areStringsEqual(string(root), string(parentName)), "Invalid root name");
+
 
             // Get the address data of the Ethereum L1 address.
-            ( address _address, uint96 accountData) = xap.getOwnerWithData(bytes32(bytes(label)));
+            ( address _address, uint96 accountData) = xap.getOwnerWithData(bytes32(label));
 
             // Data URL for the contenthash.
             string memory beforeData = "data:text/html,%3Cbr%3E%3Ch2%3E%3Cdiv%20style%3D%22text-align%3Acenter%3B%20font-family%3A%20Arial%2C%20sans-serif%3B%22%3EXAP%20Account%20Owner%3A%20";
@@ -123,10 +161,14 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver{
         } else { 
             revert CannotResolve(bytes4(selector));
         }
-    }
+    } 
 
     function areStringsEqual(string memory _a, string memory _b) private pure returns (bool) {
         return keccak256(bytes(_a)) == keccak256(bytes(_b));
+    }
+
+    function setParentAddress(address addr) public onlyOwner {
+        parentAddress = addr;
     }
 
     /**

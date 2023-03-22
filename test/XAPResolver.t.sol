@@ -35,7 +35,7 @@ contract XAPResolverTest is Test{
         xap = new XAPRegistry();
 
         // Deploy the XAPResolver.
-        resolver = new XAPResolver(xap);
+        resolver = new XAPResolver(xap,bytes("\x03xap\x03eth\x00"));
 
         // Set up a XAP address.
         xap.setController(account, true);

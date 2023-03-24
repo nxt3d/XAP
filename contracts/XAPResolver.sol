@@ -10,6 +10,7 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IMutableRegistry} from "./IMutableRegistry.sol";
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
@@ -31,14 +32,18 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
     using BytesUtilsXAP for bytes;
 
     IXAPRegistry public xap;
+
+    IMutableRegistry public mutableRegistry;
+
     bytes public parentName;
 
     // The name of the parent address.
     address public parentAddress;
 
-    constructor (IXAPRegistry _xap, bytes memory _parentName) {
+    constructor (IXAPRegistry _xap, IMutableRegistry _mutableRegistry, bytes memory _parentName) {
         xap = _xap;
         parentName = _parentName;
+        mutableRegistry = _mutableRegistry;
     }
 
     function resolve(bytes calldata name, bytes calldata data)
@@ -47,12 +52,6 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
         override (IExtendedResolver, IXAPResolver)
         returns (bytes memory, address)
     {
-
-        // Check to see if the name is the same as the parent name.
-        if (areStringsEqual(string(name), string(parentName))){
-
-            return (abi.encodePacked(bytes20(bytes1(0x01))),address(0x01));
-        }
 
         // Read function selector from the data.
         bytes4 selector = bytes4(data[0:4]);
@@ -75,9 +74,18 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
                 revert CannotResolve(bytes4(selector));
             }
 
-            // Get the label of the name
-            //(string memory label, ) = name.getFirstLabel();
 
+            // Check to see if the name is the parent name.
+            if (areStringsEqual(string(name), string(parentName))){
+
+                address mutableAddress = mutableRegistry.resolveAddress(name, cointype_ChainId);
+
+                if (mutableAddress == address(0)){
+                    // If the address is not found then revert.
+                    revert CannotResolve(bytes4(selector));
+                }
+                return (abi.encodePacked(mutableAddress),address(this));
+            }
             // Split the name into the label and the parent name.
             (bytes memory label, bytes memory root) = bytes(name).splitBytes(name.length - parentName.length);
             // console log label and chainId
@@ -90,6 +98,11 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
 
             // Resolve the address of the label on the chain id.
             address resolvedAddress = xap.resolveAddress(bytes32(label), cointype_ChainId);
+
+            if (resolvedAddress == address(0)){
+                // If the address is not found then revert.
+                revert CannotResolve(bytes4(selector));
+            }
             
             // Return the resolved address.
             return (abi.encodePacked(resolvedAddress), address(this)); 
@@ -99,6 +112,14 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
 
             // Strip off the function selector and decode the ABI encoded function call (data).
             ( ,string memory key) = abi.decode(data[4:], (bytes32, string));
+
+            // Check to see if the name is the parent name.
+            if (areStringsEqual(string(name), string(parentName))){
+
+                string memory textRecord = mutableRegistry.getTextRecord(name, key);
+
+                return (bytes(textRecord),address(this));
+            }
 
             // Split the key into the key and chain id.
             (bytes memory keyBytes, bytes memory chainId) = bytes(key).splitBytes(17);
@@ -130,6 +151,14 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
         } else if (selector == 0xbc1c58d1) {
             //Resolve contenthash.
 
+            // Check to see if the name is the parent name.
+            if (areStringsEqual(string(name), string(parentName))){
+
+                bytes memory contentHash = mutableRegistry.getContentHash(name);
+
+                return (contentHash,address(this));
+            }
+
             // Split the name into the label and the parent name.
             (bytes memory label, bytes memory root) = bytes(name).splitBytes(name.length - parentName.length);
             // console log label and chainId
@@ -154,6 +183,11 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
             outString = string.concat(outString,delimter);
             outString = string.concat(outString,Strings.toString(accountData));
             outString = string.concat(outString,afterData);
+
+            if (_address == address(0)){
+                // If the address is not found then revert.
+                revert CannotResolve(bytes4(selector));
+            }
 
             // Return the data URL.
             return (bytes(outString), address(this));

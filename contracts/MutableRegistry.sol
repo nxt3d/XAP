@@ -6,12 +6,12 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {Controllable} from "./Controllable.sol";
 
-error Unauthorized(bytes32 name);
-error NotAvailable(bytes32 name);
-error AccountImmutable(bytes32 name, uint256 chainId, address account);
+error Unauthorized(bytes name);
+error NotAvailable(bytes name);
+error AccountImmutable(bytes name, uint256 chainId, address account);
 error CannotSetOwnerToZeroAddress();
 error MustHaveNonZeroAddress();
-error ImmutableRecord(bytes32 name, uint256 chainId, uint96 addressData);
+error ImmutableRecord(bytes name, uint256 chainId, uint96 addressData);
 error CannotDelegateToSelf();
 
 contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
@@ -29,7 +29,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     /**
      * A mapping of names to records.
      */
-    mapping(bytes32 name => Record record) private records;
+    mapping(bytes name => Record record) private records;
 
     /**
      * A mapping of operators. An address that is authorized for an address
@@ -43,7 +43,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
      * for a name may make changes to the name's resolver, but may not update
      * the set of token approvals.
      */
-    mapping(address owner => mapping(bytes32 name => address delegate)) private _tokenApprovals; 
+    mapping(address owner => mapping(bytes name => address delegate)) private _tokenApprovals; 
 
     // Logged when an operator is added or removed.
     event ApprovalForAll(
@@ -54,7 +54,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     // Logged when a delegate is approved or  an approval is revoked.
     event Approved(
         address owner,
-        bytes32 indexed name,
+        bytes indexed name,
         address indexed delegate
     );
 
@@ -85,7 +85,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     /**
      * @dev Approve a delegate to be able to updated records on a name.
      */
-    function approve(bytes32 name, address delegate) external {
+    function approve(bytes memory name, address delegate) external {
 
         if(msg.sender == delegate){
             revert CannotDelegateToSelf();         
@@ -98,7 +98,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     /**
      * @dev Check to see if the delegate has been approved by the owner for the name.
      */
-    function isApprovedFor(address owner, bytes32 name, address delegate)
+    function isApprovedFor(address owner, bytes memory name, address delegate)
         public
         view
         returns (bool)
@@ -115,7 +115,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
      */
 
     function register(
-        bytes32 name, 
+        bytes memory name, 
         address _owner, 
         uint256 chainId, 
         address _address
@@ -143,7 +143,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
      */
 
     function registerWithData(
-        bytes32 name, 
+        bytes memory name, 
         address _owner, 
         bytes memory contentHash, 
         uint256 chainId, 
@@ -169,7 +169,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     * @param chainId The chainId on which the address will be registered.
     * @param _address The account to be registered with the name.
     */ 
-    function registerAddress(bytes32 name, uint256 chainId, address _address) external onlyAuthorized(name){
+    function registerAddress(bytes memory name, uint256 chainId, address _address) external onlyAuthorized(name){
 
         // Make sure the address is not the 0 address. 
         if(_address == address(0)){
@@ -186,7 +186,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     * @param _address The address to be set as the owner of the name.
     */    
 
-    function setOwner(bytes32 name, address _address) external onlyAuthorized(name){
+    function setOwner(bytes memory name, address _address) external onlyAuthorized(name){
 
         // Make sure the address is not the zero address.
         if (_address == address(0)){
@@ -203,7 +203,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     * @param _contentHash The auxiliary data of the account.
     */    
 
-    function setContentHash(bytes32 name, bytes memory _contentHash) external onlyAuthorized(name){
+    function setContentHash(bytes memory name, bytes memory _contentHash) external onlyAuthorized(name){
 
         records[name].contentHash = _contentHash;
 
@@ -216,7 +216,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     * @param value The value of the text record.
     */    
 
-    function setTextRecord(bytes32 name, string memory key, string memory value) external onlyAuthorized(name){
+    function setTextRecord(bytes memory name, string memory key, string memory value) external onlyAuthorized(name){
 
         records[name].textRecords[key] = value;
 
@@ -229,7 +229,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     * @return The address associated with the name on the specified chain.
     */
 
-    function resolveAddress(bytes32 name, uint256 chainId) public view returns (address){
+    function resolveAddress(bytes memory name, uint256 chainId) public view returns (address){
 
         // resolve the address and return the account.
         // Note: if the address is not set the account will be the zero address.
@@ -244,11 +244,37 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     * @return The owner of the name.
     */
 
-    function getOwner(bytes32 name) public view returns (address){
+    function getOwner(bytes memory name) public view returns (address){
 
         // Note: If the name has not been registered the owner will be the zero address.
         address _owner = records[name].owner; 
         return _owner;
+
+    }
+
+    /**
+     * 
+     * @dev Get the content hash of the account.
+     * @param name The name for which the content hash will be returned.
+     * @return The content hash of the account.
+     */
+
+    function getContentHash(bytes memory name) public view returns (bytes memory){
+
+        bytes memory _contentHash = records[name].contentHash;
+        return _contentHash;
+    }
+
+    /**
+     * @dev Get the text record of the account.
+     * @param name The name for which the text record will be returned.
+     * @param key The key of the text record.
+     */
+
+    function getTextRecord(bytes memory name, string memory key) public view returns (string memory){
+
+        string memory _textRecord = records[name].textRecords[key];
+        return _textRecord;
 
     }
 
@@ -258,7 +284,7 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     * @return Boolean indicating whether the name is available for registration.
     */
 
-    function available(bytes32 name) external view returns (bool){
+    function available(bytes memory name) external view returns (bool){
 
         address _owner = records[name].owner; 
         return _owner == address(0);
@@ -281,16 +307,17 @@ contract MutableRegistry is IMutableRegistry, ERC165, Controllable{
     }
 
     //Check whether the sender is authorized to access the function.
-    modifier onlyAuthorized(bytes32 name){
+    modifier onlyAuthorized(bytes memory name){
 
-        if (isAuthorized(name)){
+        // If the sender is not! authorized, revert.
+        if (!isAuthorized(name)){
             revert Unauthorized(name);
         }
         _;
 
     }
 
-    function isAuthorized(bytes32 name) internal view  returns (bool) {
+    function isAuthorized(bytes memory name) internal view  returns (bool) {
 
         address owner = getOwner(name);
 

@@ -326,9 +326,12 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
     //Check whether the sender is authorized to access the function.
     modifier onlyAuthorized(bytes32 name){
 
-        if (isAuthorized(name)){
+        // If the sender is not! authorized, revert.
+        if (!isAuthorized(name)){
             revert Unauthorized(name);
         }
+
+
         _;
 
     }
@@ -337,6 +340,7 @@ contract XAPRegistry is IXAPRegistry, ERC165, Controllable {
 
         address owner = getOwner(name);
 
+        // If the sender is the owner or is approved for all or is approved for the name, return true.
         return owner == msg.sender || isApprovedForAll(owner, msg.sender) || 
             isApprovedFor(owner, name, msg.sender);
     }

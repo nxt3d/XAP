@@ -13,3 +13,6 @@ broadcast/
 # Ignore dev tools
 tools/
 temp/
+
+# Ignore the scripts folder
+scripts/

@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.18;
 
-import "forge-std/console.sol";
+//import "forge-std/console.sol";
 import {IExtendedResolver} from "./IExtendedResolver.sol";
 import {IXAPRegistry} from "./IXAPRegistry.sol";
 import {IXAPResolver} from "./IXAPResolver.sol";
@@ -35,10 +35,8 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
 
     IMutableRegistry public mutableRegistry;
 
+    // The name of the parent name, e.g. xap.eth.
     bytes public parentName;
-
-    // The name of the parent address.
-    address public parentAddress;
 
     constructor (IXAPRegistry _xap, IMutableRegistry _mutableRegistry, bytes memory _parentName) {
         xap = _xap;
@@ -56,13 +54,20 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
         // Read function selector from the data.
         bytes4 selector = bytes4(data[0:4]);
         // Resolve address.
-        if (selector == 0xf1cb7e06) {
+        if (selector == 0xf1cb7e06 || selector == 0x3b3b57de) {
 
-            // Decode the ABI encoded function call (data).
-            // Save the coin type and not the function selector or node.
-            ( , uint256 cointype_ChainId) = abi.decode(data[4:], (bytes32, uint256));
+            uint256 cointype_ChainId;
 
-            // XAP only supports EVM chains. 
+            // If the selector is the addr(bytes32) function (without a coin type) then set the coin type to ETH (60).
+            if (selector == 0x3b3b57de){
+                cointype_ChainId = 60;
+            } else {
+                // selector: addr(bytes32,uint256)
+                // Decode the ABI encoded function call (data).
+                // Save the coin type and not the function selector or node.
+                ( , cointype_ChainId) = abi.decode(data[4:], (bytes32, uint256));
+            }
+
             // If the coin type is not ETH (60) then check to see if it is an another EVM chain, and extract the chain ID.
             if (cointype_ChainId == 60){ 
                 cointype_ChainId = 1;
@@ -74,7 +79,6 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
                 revert CannotResolve(bytes4(selector));
             }
 
-
             // Check to see if the name is the parent name.
             if (areStringsEqual(string(name), string(parentName))){
 
@@ -84,11 +88,11 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
                     // If the address is not found then revert.
                     revert CannotResolve(bytes4(selector));
                 }
-                return (abi.encodePacked(mutableAddress),address(this));
+                return (abi.encode(mutableAddress),address(this));
             }
+
             // Split the name into the label and the parent name.
             (bytes memory label, bytes memory root) = bytes(name).splitBytes(name.length - parentName.length);
-            // console log label and chainId
             
             // Remove the first byte of the label (the length of the label).
             ( , label) = label.splitBytes(1);
@@ -105,7 +109,7 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
             }
             
             // Return the resolved address.
-            return (abi.encodePacked(resolvedAddress), address(this)); 
+            return (abi.encode(resolvedAddress), address(this)); 
 
         } else if (selector == 0x59d1d43c) {
             //Resolve text.
@@ -132,7 +136,6 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
 
                 // Split the name into the label and the parent name.
                 (bytes memory label, bytes memory root) = bytes(name).splitBytes(name.length - parentName.length);
-                // console log label and chainId
                 
                 // Remove the first byte of the label (the length of the label).
                 ( , label) = label.splitBytes(1);
@@ -144,7 +147,7 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
                 ( , uint96 addressData) = xap.resolveAddressWithData(bytes32(label),chainIdInt);
 
                 // Return the address data.
-                return (abi.encodePacked(addressData), address(this));
+                return (abi.encode(addressData), address(this));
             } else {
                 revert CannotResolve(bytes4(selector));
             }
@@ -161,7 +164,6 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
 
             // Split the name into the label and the parent name.
             (bytes memory label, bytes memory root) = bytes(name).splitBytes(name.length - parentName.length);
-            // console log label and chainId
             
             // Remove the first byte of the label (the length of the label).
             ( , label) = label.splitBytes(1);
@@ -201,8 +203,8 @@ contract XAPResolver is ERC165, IXAPResolver, IExtendedResolver, Ownable{
         return keccak256(bytes(_a)) == keccak256(bytes(_b));
     }
 
-    function setParentAddress(address addr) public onlyOwner {
-        parentAddress = addr;
+    function setParentName(bytes memory name) public onlyOwner {
+        parentName = name;
     }
 
     /**

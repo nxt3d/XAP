@@ -12,6 +12,8 @@ interface IXAPResolver {
 
     function parentName() external view returns (bytes memory);
 
+    function setParentName(bytes memory name) external;
+
     function resolve(bytes memory name, bytes memory data)
         external
         view

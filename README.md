@@ -107,6 +107,9 @@ contract ExampleContract {
     }
 }
 ```
+### Features and Limitations
+
+One important feature of XAP is its ability to provide resolved addresses for a single name on each EVM compatible chain using the chain ID. This is particularly significant for multisig wallets that may have different addresses on various EVM chains. However, currently, popular clients like ethers.js and Metamask do not support ENSIP-11, which enables EVM compatible chain address resolution, such as mywallet.xap.eth. As a result, it is necessary to use the XAP registry directly to resolve any addresses other than those on the mainnet Ethereum, such as Layer 2s. Once ENSIP-11 gains more widespread support, alternative EVM chains can be used directly via clients such as Ethers.js and Metamask.
 
 ### Security and Audits
 

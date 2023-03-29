@@ -67,7 +67,7 @@ contract XAPResolverTest is Test{
 
 
         // Check that the address is correct.
-        assertEq(address(bytes20(resolvedAddress)), account2);
+        assertEq(address(uint160(uint256(bytes32(resolvedAddress)))), account2);
 
     }
     function test_002____resolve_addr________________ResolveAnRootAddressXAPETHwithNoChainId() public {
@@ -79,7 +79,8 @@ contract XAPResolverTest is Test{
 
 
         // Check that the address is correct.
-        assertEq(address(bytes20(resolvedAddress)), account2);
+        assertEq(address(uint160(uint256(bytes32(resolvedAddress)))), account2);
+
 
     }
     function test_003____resolve_addr________________ResolveAnXAPAdressAsENSSubname() public {
@@ -91,7 +92,8 @@ contract XAPResolverTest is Test{
 
 
         // Check that the address is correct.
-        assertEq(address(bytes20(resolvedAddress)), account2);
+        assertEq(address(uint160(uint256(bytes32(resolvedAddress)))), account2);
+
 
     }
 
@@ -105,7 +107,8 @@ contract XAPResolverTest is Test{
             resolver.resolve(bytes("\x0aabc-driver\x03xap\x03eth\x00"), 
                 abi.encodeWithSelector(bytes4(0xf1cb7e06), bytes32(0), uint256(0x80000000) | uint256(42161)));
         // Check that the address is correct.
-        assertEq(address(bytes20(resolvedAddress)), account2);
+        assertEq(address(uint160(uint256(bytes32(resolvedAddress)))), account2);
+
 
     }
 
@@ -130,7 +133,7 @@ contract XAPResolverTest is Test{
 
     
         // Check that the address is correct.
-        assertEq(uint96(bytes12(resolvedAddressData)), 200);
+        assertEq(uint96(uint256(bytes32(resolvedAddressData))), 200);
     }
 
     function test_007____resolve_text________________ResolveTheAddressDataOfAXAPAdressChainId42161() public {
@@ -145,7 +148,8 @@ contract XAPResolverTest is Test{
 
     
         // Check that the address is correct.
-        assertEq(uint96(bytes12(resolvedAddressData)), 200);
+        assertEq(uint96(uint256(bytes32(resolvedAddressData))), 200);
+
     }
     function test_008____resolve_contenthash_________ResolveTheContentHashOfAXAPAdress() public {
 

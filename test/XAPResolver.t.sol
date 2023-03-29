@@ -70,7 +70,19 @@ contract XAPResolverTest is Test{
         assertEq(address(bytes20(resolvedAddress)), account2);
 
     }
-    function test_002____resolve_addr________________ResolveAnXAPAdressAsENSSubname() public {
+    function test_002____resolve_addr________________ResolveAnRootAddressXAPETHwithNoChainId() public {
+
+        // Check that the resolver can resolve the address.
+        (bytes memory resolvedAddress, ) = 
+            resolver.resolve(bytes("\x03xap\x03eth\x00"), 
+                abi.encodeWithSelector(bytes4(0x3b3b57de), bytes32(0)));
+
+
+        // Check that the address is correct.
+        assertEq(address(bytes20(resolvedAddress)), account2);
+
+    }
+    function test_003____resolve_addr________________ResolveAnXAPAdressAsENSSubname() public {
 
         // Check that the resolver can resolve the address.
         (bytes memory resolvedAddress, ) = 
@@ -83,7 +95,7 @@ contract XAPResolverTest is Test{
 
     }
 
-    function test_003____resolve_addr________________ResolveAnXAPAddressWithChainId42161AsENSSubname() public {
+    function test_004____resolve_addr________________ResolveAnXAPAddressWithChainId42161AsENSSubname() public {
 
         xap.registerWithData(bytes32(bytes("abc-driver")), account, 100, 42161, account2, 200); 
         assertEq(xap.resolveAddress(bytes32(bytes("abc-driver")), 42161), account2);
@@ -97,7 +109,7 @@ contract XAPResolverTest is Test{
 
     }
 
-    function test_004____resolve_text________________ResolveTheTextRecordOfTheRootXAPETH() public {
+    function test_005____resolve_text________________ResolveTheTextRecordOfTheRootXAPETH() public {
 
         // Check that the resolver can resolve the address.
         (bytes memory resolvedTextRecord, ) = 
@@ -109,7 +121,7 @@ contract XAPResolverTest is Test{
         assertTrue( equalStrings(string(resolvedTextRecord), "test text record value"));
     }
 
-    function test_005____resolve_text________________ResolveTheAddressDataOfAXAPAdress() public {
+    function test_006____resolve_text________________ResolveTheAddressDataOfAXAPAdress() public {
 
         // Check that the resolver can resolve the address.
         (bytes memory resolvedAddressData, ) = 
@@ -121,7 +133,7 @@ contract XAPResolverTest is Test{
         assertEq(uint96(bytes12(resolvedAddressData)), 200);
     }
 
-    function test_006____resolve_text________________ResolveTheAddressDataOfAXAPAdressChainId42161() public {
+    function test_007____resolve_text________________ResolveTheAddressDataOfAXAPAdressChainId42161() public {
 
         xap.registerWithData(bytes32(bytes("abc-driver")), account, 100, 42161, account2, 200); 
         assertEq(xap.resolveAddress(bytes32(bytes("abc-driver")), 42161), account2);
@@ -135,7 +147,7 @@ contract XAPResolverTest is Test{
         // Check that the address is correct.
         assertEq(uint96(bytes12(resolvedAddressData)), 200);
     }
-    function test_007____resolve_contenthash_________ResolveTheContentHashOfAXAPAdress() public {
+    function test_008____resolve_contenthash_________ResolveTheContentHashOfAXAPAdress() public {
 
         // Check that the resolver can resolve the address.
         (bytes memory resolvedContentHash, ) = 
@@ -158,7 +170,7 @@ contract XAPResolverTest is Test{
         assertEq(areEqual, true);
     }    
 
-    function test_008____resolve_contenthash_________ResolveTheContentHashOfRootXAPETH() public {
+    function test_009____resolve_contenthash_________ResolveTheContentHashOfRootXAPETH() public {
 
         // Check that the resolver can resolve the address.
         (bytes memory resolvedContentHash, ) = 
@@ -170,7 +182,7 @@ contract XAPResolverTest is Test{
     }
 
     // Test the supportsInterface function.
-    function test_009____supportsInterface___________SupportsCorrectInterfaces() public {
+    function test_010____supportsInterface___________SupportsCorrectInterfaces() public {
 
         // Check for the ISubnameWrapper interface.  
         assertEq(resolver.supportsInterface(type(IXAPResolver).interfaceId), true);
